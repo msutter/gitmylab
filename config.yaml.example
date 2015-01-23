@@ -1,0 +1,4 @@
+---
+endpoint: https://<gitlabserver>/api/v3 # API endpoint URL (required)
+private_token: <YourPrivateTocken> # Gitlab's user's private token (required)
+repos_root_path: /home/<youruser>/src/gitlab # groups/repos root path

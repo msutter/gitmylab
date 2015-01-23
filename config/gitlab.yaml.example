@@ -1,0 +1,13 @@
+---
+# endpoint
+#
+# API endpoint URL (required)
+
+endpoint: https://<gitlabserver>/api/v3
+
+# private_token
+#
+# Gitlab's user's private token (required)
+# Once logged in, you will find your token -> Profile settings -> Account -> Private token
+
+private_token: <YourPrivateTocken>

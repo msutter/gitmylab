@@ -1,0 +1,5 @@
+# repos_root_path
+#
+# The directory in which you want the gitlab groups/projects to be synced
+
+gitlab_root_path: /home/<youruser>/src/gitlab

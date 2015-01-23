@@ -1,0 +1,30 @@
+---
+# access_config_files_project
+#
+# Config files default location is ${HOME}/.gitlabsync, but
+# you can also grab the access config files from a gitlab project.
+# If defined, the local access config files (roles.yaml/users.yaml) will
+# not be created or will be ignored if present. The files in the
+# given gitlab repository will be applied.
+
+access_config_files_project: gitlab_access
+
+# map_to_active_directory
+#
+# Roles members are defined in the users.yaml file.
+# Members can also be defined in active directory with security groups memberships.
+# The group name will be mapped to a defined role. See 'ad_group' in roles.yaml.
+# Note that both AD and the 'users.yaml' config file will define the roles members.
+# If duplicates are found, the higher access right for the given gitlab group/project
+# will be applied.
+
+map_to_active_directory: true
+
+# force_regressions
+#
+# Per default, an existing permission already set in Gitlab will not set a regression.
+# With this setting, you can force the setting of a lower access right than the one already defined.
+#
+#
+
+force_regressions: false

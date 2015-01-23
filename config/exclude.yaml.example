@@ -1,0 +1,24 @@
+---
+# projects_exclude
+#
+# list of projects to be excluded from the sync
+# defaults to no projects with an empty array
+#
+# example:
+#
+# projects_exclude:
+#   - unwanted_project
+
+projects_exclude: []
+
+# groups_exclude
+#
+# list of groups to be excluded from the sync
+# defaults to no groups with an empty array
+#
+# example:
+#
+# groups_exclude:
+#   - unwanted_group
+
+groups_exclude: []

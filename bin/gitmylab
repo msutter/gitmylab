@@ -1,0 +1,210 @@
+#!/usr/bin/env ruby
+require 'pry'
+require 'thor'
+
+##################
+## sync
+# gitmylab project sync --all                                            # all projects
+#
+# gitmylab project sync --config_file                                    # projects from config include/exclude project list
+#
+# gitmylab project sync -g puppet                                        # all projects from group puppet
+# gitmylab project sync -g puppet cfmg                                   # all projects from group puppet and cfmg
+#
+# gitmylab project sync -g puppet -p jenkins                             # project named jenkins
+# gitmylab project sync -g puppet -p jenkins tomcat                      # projects named jenkins and tomcat
+
+##################
+## Branch
+# Adding
+
+# gitmylab branch add -n production -r master --all               # all projects
+#
+# gitmylab branch add -n production -r master config_file         # projects from config include/exclude project list
+#
+# gitmylab branch add -n production -r master -g puppet           # all projects from group puppet
+# gitmylab branch add -n production -r master -g puppet cfmg      # all projects from group puppet and cfmg
+#
+# gitmylab branch add -n production -r master -p jenkins -g puppet # project named jenkins
+# gitmylab branch add -n production -r master -p jenkins tomcat   # projects named jenkins and tomcat
+
+# Protect
+# gitmylab branch protect -n production -r master --all               # all projects
+
+# Unprotect
+# gitmylab branch unprotect -n production -r master --all               # all projects
+
+
+##################
+## access
+# gitmylab access add -p guest -u tgdsuma5 --all                   # all projects
+# gitmylab access add -p guest -u tgdsuma5 --all --force           # all projects and force regressions
+#
+# gitmylab access add guest -u tgdsuma5 -g puppet               # all projects from group puppet
+# gitmylab access add guest -u tgdsuma5 -g puppet cfmg          # all projects from group puppet and cfmg
+#
+# gitmylab access add guest -u tgdsuma5 -p jenkins              # project named jenkins
+# gitmylab access add guest -u tgdsuma5 -p jenkins tomcat       # projects named jenkins and tomcat
+
+# gitmylab access sync --config_file                             # projects from config include/exclude project list
+# gitmylab access sync --config_file                                  # projects from config include/exclude project list
+#
+
+#binding.pry
+begin
+  require 'gitmylab'
+  require 'pry'
+rescue LoadError
+  lib_path = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+  require "#{lib_path}/gitmylab"
+end
+
+class Branch < Thor
+  desc "add", "..."
+  def add
+    puts "add branch"
+  end
+end
+
+class GitmylabCli < Thor
+
+  class_option  :all,
+                :aliases => '-a',
+                :type    => :boolean,
+                :desc    => 'Apply to all projects in all groups'
+
+  class_option  :projects,
+                :type    => :array,
+                :aliases => '-p',
+                :desc    => 'Apply to given projects'
+
+  class_option  :projects_exclude,
+                :type    => :array,
+                :desc    => 'Exclude given projects'
+
+  class_option  :groups,
+                :type    => :array,
+                :aliases => '-g',
+                :desc    => 'Apply to projects in given groups'
+
+  class_option  :groups_exclude,
+                :type    => :array,
+                :desc    => 'Exclude projects in given groups'
+
+  class_option  :config_file,
+                :aliases => '-c',
+                :type    => :boolean,
+                :desc    => 'Apply to projects defined in the include/exclude config files'
+
+  class_option  :verbosity,
+                :enum    => [:detailed, :info, :silent],
+                :default => :detailed,
+                :aliases => '-v',
+                :desc    => 'Apply to all projects'
+
+  # desc "project", "syncronize gitlab repository"
+
+  # def project(action)
+  #   case action
+  #   when 'sync' then
+  #     projects_and_groups_options_check(__method__, options)
+  #     m = Gitmylab::Manager.new
+  #     Gitmylab::Cli::Message.level = options.verbosity
+  #     m.sync(options)
+  #   else
+  #     GitmylabCli.task_help(shell, __method__)
+  #     exit 0
+  #   end
+
+  # end
+
+
+  # desc "branch ACTION", "add a branch named BRANCH to a gitlab repository"
+  # def branch
+  #   projects_and_groups_options_check(__method__, options)
+  #   puts "Branch #{branch}!"
+  # end
+
+  desc "access", "modify access for a gitlab repository"
+
+  option :users,
+         :type     => :array,
+         :aliases  => '-u',
+         :desc     => 'Apply to given users',
+         :required => true
+
+  option :regression,
+         :aliases => '-r',
+         :default => false,
+         :type    => :boolean,
+         :desc    => 'Apply permissions regressions'
+
+  def access(name)
+    projects_and_groups_options_check(__method__, options)
+    m = Gitmylab::Manager.new
+    Gitmylab::Cli::Message.level = options.verbosity
+    m.access(options)
+  end
+
+  register(Gitmylab::Cli::Project, 'project', 'project [ACTION]', 'Manage gitlab projects.')
+  register(Gitmylab::Cli::Branch, 'branch', 'branch [ACTION]', 'Manage gitlab branches.')
+  register(Gitmylab::Cli::Access, 'access', 'access [ACTION]', 'Manage gitlab permissions.')
+
+end
+
+def projects_and_groups_options_check(shell, command, options)
+    binding.pry
+  c = options[:config_file]
+  a = options[:all]
+  p = options[:projects] ? options[:projects].any? : false
+  g = options[:groups] ? options[:groups].any? : false
+
+  # mutually exclusive project options
+  unless (p ^ c ^ a) || (g ^ c ^ a)
+    puts "Use only one of [--all(-a)], [--projects(-p)] or [--config_file(-c)]," if p
+    puts "Use only one of [--all(-a)], [--groups(-g)] or [--config_file(-c)]," if g
+    GitmylabCli.task_help(shell, command)
+    exit(0)
+  end
+end
+
+GitmylabCli.start(ARGV)
+
+def test_group_access
+  u = Gitmylab::Gitlab::User.find_by_corporate_id('Testuser1').first
+  g = Gitmylab::Gitlab::Group.find_by_path('puppet-dsc').first
+  a = Gitmylab::Access::Group.new(u,g)
+  binding.pry
+end
+
+def test_project_access
+  u = Gitmylab::Gitlab::User.find_by_username('jacques.gumy').first
+  u1 = Gitmylab::Gitlab::User.find_by_username('marc.sutter').first
+  p = Gitmylab::Gitlab::Project.find_by_path('dsc_rkw6').first
+  p1 = Gitmylab::Gitlab::Project.find_by_path('jenkins-puppet').first
+  a = Gitmylab::Access::Project.new(u,p)
+end
+
+def test_sync
+  m = Gitmylab::Manager.new
+  Gitmylab::Cli::Message.level = :detailed
+  project_names = nil
+  groups_names = nil
+  m.sync(project_names, groups_names)
+  m.report
+end
+
+def test_branch
+  m = Gitmylab::Manager.new
+  Gitmylab::Cli::Message.level = :detailed
+  m.branch
+end
+
+def debug
+  binding.pry
+end
+#test_group_access
+#test_project_access
+#test_sync
+# test_branch
+#debug

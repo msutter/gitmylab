@@ -1,0 +1,10 @@
+---
+# This is the original config hash for the active_directory gem: https://rubygems.org/gems/active_directory
+
+:host: '192.168.1.1'
+:base: 'dc=example,dc=com'
+:port: 389
+:auth:
+  :method: :simple
+  :username: 'Domain\Administrator'
+  :password: 'MyPassword'

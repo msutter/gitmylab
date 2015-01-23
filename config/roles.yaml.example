@@ -1,0 +1,13 @@
+---
+role_foo:
+  ad_group: RoleFoo
+  groups:
+    group_foo: developer
+
+role_bar:
+  ad_group: RoleBar
+  groups:
+    group_foo: developer
+    group_bar: developer
+  projects:
+    project_foo: owner
