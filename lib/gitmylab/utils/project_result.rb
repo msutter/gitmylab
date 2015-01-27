@@ -1,8 +1,9 @@
 module Gitmylab
   module Utils
 
-    class SyncResult
+    class ProjectResult
 
+      attr_accessor :command
       attr_accessor :action
       attr_accessor :status
       attr_accessor :message
@@ -12,6 +13,8 @@ module Gitmylab
       end
 
       def render
+
+
         m                   = Cli::Message.new(@project.location)
         m.end_newline       = true
         m.indent            = 0
@@ -33,6 +36,8 @@ module Gitmylab
         m.sub(git_m)
         m.sub(end_m)
         m.render
+
+
       end
 
     end

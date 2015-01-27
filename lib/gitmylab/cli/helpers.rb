@@ -27,7 +27,7 @@ module Gitmylab
       end
 
       def command
-        self.class.namespace.split(':').last
+        self.class.namespace.split(':').last.to_sym
       end
 
     end

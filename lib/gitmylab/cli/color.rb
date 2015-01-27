@@ -7,6 +7,7 @@ module Gitmylab
         :success   => :green,
         :fail      => :red,
         :skip      => :magenta,
+        :empty     => :blue,
         :original  => nil
       }
 

@@ -7,7 +7,9 @@ module Gitmylab
     include CommandLineReporter
     include Gitmylab::Utils::Helpers
 
-    def initialize(command)
+    def initialize(command, action)
+      @command = command
+      @action = action
       @access_project = nil
       @sync_results = []
       Utils::Config.setup(command)
@@ -18,11 +20,75 @@ module Gitmylab
     #   r.render
     # end
 
+    def branch_list(cli_options)
+      selected_projects = select_sync_projects(cli_options)
+
+      project_iterator cli_options, selected_projects do |project|
+        branches   = project.branches
+
+        sr         = Utils::ProjectResult.new(project)
+        sr.command = @command
+        sr.action  = @action
+        sr.status  = :empty
+        sr.message = branches.count < 1 ? 'No branches found !' : ''
+
+        branches.each do |branch|
+          sr.status  = :success
+          sr.message << branch.name
+          sr.message << " [ protected ]" if branch.protected
+          sr.message << "\n"
+        end
+
+        binding.pry
+        sr.render
+      end
+    end
+
     def branch_add(cli_options)
       selected_projects = select_sync_projects(cli_options)
-      selected_projects.each do |project|
-        project.branches
+
+      project_iterator cli_options, selected_projects do |project|
+        sr         = Utils::ProjectResult.new(project)
+        sr.command = @command
+        sr.action  = @action
+
+        if project.branches.any? {|b| b.name == cli_options['name']}
+          sr.status  = :skip
+          sr.message = "branch #{cli_options['name']} already exists !"
+        else
+          ::Gitlab.create_branch(project.id, cli_options['name'], cli_options['ref'])
+          sr.status  = :success
+          sr.message = "branch #{cli_options['name']} created"
+        end
+        sr.render
       end
+
+    end
+
+    def branch_protect(cli_options)
+      selected_projects = select_sync_projects(cli_options)
+
+      project_iterator cli_options, selected_projects do |project|
+        sr         = Utils::ProjectResult.new(project)
+        sr.command = @command
+        sr.action  = @action
+
+        if project.branches.any? {|b| b.name == cli_options['name']}
+          if branch.protected
+            sr.status  = :skip
+            sr.message = "branch #{cli_options['name']} already protected !"
+          else
+            ::Gitlab.protect_branch(project.id, cli_options['name'])
+            sr.status  = :success
+            sr.message = "branch #{cli_options['name']} is now protected"
+          end
+        else
+          sr.status  = :skip
+          sr.message = "branch #{cli_options['name']} not found !"
+        end
+        sr.render
+      end
+
     end
 
     def access_add(cli_options)
@@ -37,18 +103,9 @@ module Gitmylab
 
       selected_projects = select_sync_projects(cli_options)
 
-      # add syncing progress bars
-      syncing_bar = Cli::SyncingBar.new(
-        :title                => 'Syncing project ',
-        :total                => selected_projects.count,
-        :sub_title_max_length => @path_max_length,
-      )
+      project_iterator cli_options, selected_projects do |project|
 
-      selected_projects.each_with_index do |project, i|
-        horizontal_rule :width => terminal_width
-        syncing_bar.resume
-        syncing_bar.increment(project.path)
-        sr = Utils::SyncResult.new(project)
+        sr = Utils::ProjectResult.new(project)
         group_dir = project.create_group_dir
 
         # check if project directory exists to update/clone
@@ -59,24 +116,6 @@ module Gitmylab
             r = project.pull
             sr.status  = r.status
             sr.message = r.message
-
-            ## skipping the unclean files part for now
-            # if project.unclean?
-            #   r = project.status
-
-            #   status_msg         = Cli::Message.new("Warning: not in sync with remote branch")
-            #   status_msg.indent  = 0
-            #   status_msg.prepend = '==> '
-            #   status_msg.color   = :yellow
-
-            #   git_status_msg               = Cli::Message.new(r.message)
-            #   git_status_msg.indent        = 2
-            #   git_status_msg.color         = :yellow
-            #   git_status_msg.start_newline = true
-            #   git_status_msg.end_newline   = true
-
-            #   status_msg.sub(git_status_msg)
-            # end
 
           else
             sr.status  = :skip
@@ -91,13 +130,10 @@ module Gitmylab
           sr.message = "Cloning into '#{project.location}'"
         end
 
-        syncing_bar.pause
-        horizontal_rule :width => terminal_width
         sr.render
         @sync_results << sr
       end
 
-      syncing_bar.finish
       @sync_results
     end
 
@@ -181,10 +217,31 @@ module Gitmylab
         :projects_exclude => ope,
         :groups_include   => ogi,
         :groups_exclude   => oge,
+
       }
     end
 
+    def project_iterator(options, enumerable, &block)
 
+      syncing_bar = Cli::SyncingBar.new(
+        :title                => "#{@command.to_s} #{@action.to_s} ",
+        :total                => enumerable.count,
+        :sub_title_max_length => @path_max_length,
+      )
+
+      iterations = enumerable.size
+      counter = 0
+      enumerable.each do |item|
+        horizontal_rule :width => terminal_width
+        syncing_bar.resume
+        syncing_bar.increment(item.path)
+        syncing_bar.pause
+        horizontal_rule :width => terminal_width
+        yield item
+      end
+      syncing_bar.finish
+
+    end
 
     def status_color(status)
       Cli::Color.status_color(status)

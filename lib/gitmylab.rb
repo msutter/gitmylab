@@ -16,7 +16,7 @@ module Gitmylab
 
   require_relative "gitmylab/utils/helpers"
   require_relative "gitmylab/utils/config"
-  require_relative "gitmylab/utils/sync_result"
+  require_relative "gitmylab/utils/project_result"
 
   require_relative "gitmylab/gitlab/base"
   require_relative "gitmylab/gitlab/user"

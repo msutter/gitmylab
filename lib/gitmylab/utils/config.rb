@@ -32,7 +32,7 @@ module Gitmylab
           # setup and connect
           gitlab_setup
 
-          if command == 'access'
+          if command == :access
             access_setup
            # ad setup
             ad_setup if configatron.access.map_to_active_directory

@@ -8,11 +8,8 @@ module Gitmylab
       desc "sync", "syncronize gitlab repository"
 
       def sync
-
         projects_and_groups_options_check(shell, command, options)
-
-        m = Gitmylab::Manager.new(command)
-
+        m = Gitmylab::Manager.new(command, __method__)
         Gitmylab::Cli::Message.level = options.verbosity
         m.project_sync(options)
       end
