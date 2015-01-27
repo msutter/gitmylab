@@ -110,8 +110,8 @@ module Gitmylab
         :projects_exclude => ope,
         :groups_include   => ogi,
         :groups_exclude   => oge,
-
       }
+
     end
 
     def project_iterator(options, enumerable, &block)
@@ -122,15 +122,22 @@ module Gitmylab
         :sub_title_max_length => @path_max_length,
       )
 
-      iterations = enumerable.size
-      counter = 0
       enumerable.each do |item|
         horizontal_rule :width => terminal_width
         syncing_bar.resume
         syncing_bar.increment(item.path)
         syncing_bar.pause
         horizontal_rule :width => terminal_width
-        yield item
+        begin
+          yield item
+        rescue => e
+          sr         = Utils::ProjectResult.new(item)
+          sr.command = @command
+          sr.action  = @action
+          sr.status  = :fail
+          sr.message = e.message
+          sr.render
+        end
       end
       syncing_bar.finish
 

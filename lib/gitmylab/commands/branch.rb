@@ -20,8 +20,6 @@ module Gitmylab
             sr.message << " [ protected ]" if branch.protected
             sr.message << "\n"
           end
-
-          binding.pry
           sr.render
         end
       end
@@ -37,11 +35,16 @@ module Gitmylab
             sr.status  = :skip
             sr.message = "branch #{cli_options['name']} already exists !"
           else
-            ::Gitlab.create_branch(project.id, cli_options['name'], cli_options['ref'])
-            ::Gitlab.protect_branch(project.id, cli_options['name']) if cli_options['protected']
-            sr.status  = :success
-            sr.message = "branch #{cli_options['name']} created"
-            sr.message << " and protected" if cli_options['protected']
+            if project.default_branch
+              ::Gitlab.create_branch(project.id, cli_options['name'], cli_options['ref'])
+              ::Gitlab.protect_branch(project.id, cli_options['name']) if cli_options['protected']
+              sr.status  = :success
+              sr.message = "branch #{cli_options['name']} created"
+              sr.message << " and protected" if cli_options['protected']
+            else
+              sr.status  = :skip
+              sr.message = "No default branch found.\nThis often appends with empty gitlab repositories"
+            end
           end
           sr.render
         end

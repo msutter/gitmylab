@@ -25,13 +25,13 @@ module Gitmylab
         :type    => :string,
         :desc    => 'Create branch from commit sha or existing branch',
         :default => 'master'
-        
+
       option :protected,
         :aliases => '-P',
         :type    => :boolean,
         :desc    => 'By default, the new branch will be unprotected. Use this option to protect the new branch',
         :default => false
-        
+
 
       def add
         projects_and_groups_options_check(shell, command, options)
