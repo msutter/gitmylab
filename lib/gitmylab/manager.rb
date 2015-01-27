@@ -6,6 +6,7 @@ module Gitmylab
 
     include Gitmylab::Commands::Project
     include Gitmylab::Commands::Branch
+    include Gitmylab::Commands::Access
 
     include CommandLineReporter
     include Gitmylab::Utils::Helpers
@@ -23,12 +24,6 @@ module Gitmylab
     #   r = Cli::Report.new(@sync_results)
     #   r.render
     # end
-
-    def access_add(cli_options)
-      selected_projects = select_access_projects(cli_options)
-      selected_groups = select_access_groups(cli_options)
-      binding.pry
-    end
 
     private
 

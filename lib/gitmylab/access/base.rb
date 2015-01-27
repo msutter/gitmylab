@@ -56,7 +56,7 @@ module Gitmylab
             )
           else
             OpenStruct.new(
-              :status => :skipped,
+              :status => :skip,
               :reason => :regression,
               :access => current_access_name,
             )
@@ -65,7 +65,7 @@ module Gitmylab
         else
           # wanted access already set
           OpenStruct.new(
-            :status => :skipped,
+            :status => :skip,
             :reason => :exists,
             :access => current_access_name,
           )

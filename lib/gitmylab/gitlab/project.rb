@@ -43,11 +43,15 @@ module Gitmylab
 
       def members
         attributes = [id]
-        @members_cache ||= list(Gitlab, :team_members, attributes)
+        @members_cache ||= list(::Gitlab, :team_members, attributes)
       end
 
       def member?(user)
         members.detect{|m| m.id == user.id} ? true : nil
+      end
+
+      def member_access(user)
+        members.detect{|m| m.id == user.id}.access_level
       end
 
       def git

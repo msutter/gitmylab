@@ -5,7 +5,6 @@ module Gitmylab
       def initialize(user, project)
         super(user, project)
         @project = @target
-
       end
 
       private
@@ -21,6 +20,8 @@ module Gitmylab
         @project.refresh
         r
       end
+
+      private
 
     end
   end
