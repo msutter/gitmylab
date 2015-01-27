@@ -39,6 +39,9 @@ module Gitmylab
   require_relative 'gitmylab/cli/report'
   require_relative 'gitmylab/cli/fake_stdout'
 
+  require_relative 'gitmylab/commands/project.rb'
+  require_relative 'gitmylab/commands/branch.rb'
+
   require_relative "gitmylab/version"
   require_relative 'gitmylab/manager'
 
