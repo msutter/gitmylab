@@ -7,7 +7,7 @@ module Gitmylab
 
       desc "list", "List branches to gitlab projects"
       def list
-        projects_and_groups_options_check(shell, command, options)
+        options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
         m.branch_list(options)
       end
@@ -34,7 +34,7 @@ module Gitmylab
 
 
       def add
-        projects_and_groups_options_check(shell, command, options)
+        options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
         m.branch_add(options)
       end
@@ -46,7 +46,7 @@ module Gitmylab
         :desc     => 'The name of the branch',
         :required => true
       def protect
-        projects_and_groups_options_check(shell, command, options)
+        options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
         m.branch_protect(options)
       end
@@ -58,7 +58,7 @@ module Gitmylab
         :desc     => 'The name of the branch',
         :required => true
       def unprotect
-        projects_and_groups_options_check(shell, command, options)
+        options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
         m.branch_unprotect(options)
       end

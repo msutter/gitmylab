@@ -28,7 +28,6 @@ module Gitmylab
         @target  = target
       end
 
-
       def get
         member = @target.members.detect{|m| m.id == @user.id}
         if member

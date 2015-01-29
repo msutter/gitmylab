@@ -4,7 +4,15 @@ module Gitmylab
     module Access
 
       def access_add(cli_options)
-        selected_projects = select_sync_projects(cli_options)
+
+        selected_projects = select_projects(cli_options)
+        selected_groups = select_groups(cli_options)
+
+        item_count = selected_projects.count + selected_groups.count
+        if item_count == 0
+          puts 'No Items found Exiting....'.red
+          exit 1
+        end
 
         project_iterator cli_options, selected_projects do |project|
           sr         = Utils::ProjectResult.new(project)
@@ -31,12 +39,8 @@ module Gitmylab
           end
           sr.render
         end
+
       end
-
-
-      # selected_projects = select_access_projects(cli_options)
-      # selected_groups = select_access_groups(cli_options)
-
 
     end
 

@@ -5,25 +5,37 @@ module Gitmylab
 
       private
 
-      def projects_and_groups_options_check(shell, command, options)
-        c = options[:config_file]
-        a = options[:all]
-        p = options[:projects] ? options[:projects].any? : false
-        g = options[:groups] ? options[:groups].any? : false
+      def options_check(shell, command, options)
+        @c  = options[:config_file]
+        @a  = options[:all]
+        @p  = options[:projects] ? options[:projects].any? : false
+        @g  = options[:groups] ? options[:groups].any? : false
+        @n  = options[:namespaces] ? options[:namespaces].any? : false
+        @u  = options[:users] ? options[:users].any? : false
+        @l  = options[:level] ? true : false
+        @an = options[:all_namespaces]
 
-        # mutually exclusive project options
-        unless (p ^ c ^ a) || (g ^ c ^ a)
-          if p
-            puts "Use only one of [--all(-a)], [--projects(-p)] or [--config_file(-c)],"
-          elsif g
-            puts "Use only one of [--all(-a)], [--groups(-g)] or [--config_file(-c)],"
-          else
-            puts "No option specified !"
-          end
-          puts ''
-          GitmylabCli.task_help(shell, command)
-          exit(0)
-        end
+        options_help if options_invalid?
+
+      end
+
+      def options_valid?
+        ((@p || @g) ^ @a ^ @c) || (((@n || @an) && @u && @l) ^ @c)
+      end
+
+      def options_invalid?
+        !options_valid?
+      end
+
+      def options_help
+        puts "invalid option combination."
+        help_msg
+      end
+
+      def help_msg
+        puts ''
+        GitmylabCli.task_help(shell, command)
+        exit(0)
       end
 
       def command
@@ -33,5 +45,4 @@ module Gitmylab
     end
 
   end
-
 end

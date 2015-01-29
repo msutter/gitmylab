@@ -7,6 +7,12 @@ module Gitmylab
         :groups
       end
 
+      def self.find_by_group_pathes(pathes)
+        self.all.select do |group|
+          pathes.include?(group.path)
+        end
+      end
+
       def refresh
         @members_cache= nil
       end

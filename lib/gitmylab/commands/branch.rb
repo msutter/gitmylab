@@ -4,8 +4,8 @@ module Gitmylab
     module Branch
 
       def branch_list(cli_options)
-        selected_projects = select_sync_projects(cli_options)
-
+        selected_projects = select_projects(cli_options)
+        exit 1 if selected_projects.empty?
         project_iterator cli_options, selected_projects do |project|
           branches   = project.branches
           sr         = Utils::ProjectResult.new(project)
@@ -25,8 +25,8 @@ module Gitmylab
       end
 
       def branch_add(cli_options)
-        selected_projects = select_sync_projects(cli_options)
-
+        selected_projects = select_projects(cli_options)
+        exit 1 if selected_projects.empty?
         project_iterator cli_options, selected_projects do |project|
           sr         = Utils::ProjectResult.new(project)
           sr.command = @command
@@ -52,8 +52,8 @@ module Gitmylab
       end
 
       def branch_protect(cli_options)
-        selected_projects = select_sync_projects(cli_options)
-
+        selected_projects = select_projects(cli_options)
+        exit 1 if selected_projects.empty?
         project_iterator cli_options, selected_projects do |project|
           sr         = Utils::ProjectResult.new(project)
           sr.command = @command
@@ -77,8 +77,8 @@ module Gitmylab
       end
 
       def branch_unprotect(cli_options)
-        selected_projects = select_sync_projects(cli_options)
-
+        selected_projects = select_projects(cli_options)
+        exit 1 if selected_projects.empty?
         project_iterator cli_options, selected_projects do |project|
           sr         = Utils::ProjectResult.new(project)
           sr.command = @command

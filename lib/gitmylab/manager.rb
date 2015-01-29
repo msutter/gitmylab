@@ -27,46 +27,57 @@ module Gitmylab
 
     private
 
-    def select_groups(cli_options)
-      selections = get_selections(cli_options)
-      Gitmylab::Gitlab::Groups.filter_by_projects_and_groups(selections)
+    def select_projects(cli_options)
+      projects = spinner('Loading selected gitlab projects...') do
+        selections = get_project_selections(cli_options)
+        Gitmylab::Gitlab::Project.filter_by_projects_and_groups(selections)
+      end
+      count_message('project', projects)
+      projects
     end
 
-    def select_sync_projects(cli_options)
-      # add loading spinner
-      spinner = Cli::Spinner.new('Loading selected gitlab projects...')
-      spinner.run
+    def select_groups(cli_options)
+      groups = []
+      if cli_options.has_key?('namespaces')
+        pathes = cli_options.namespaces ? cli_options.namespaces : []
+        groups = spinner('Loading selected gitlab groups...') do
+          Gitmylab::Gitlab::Group.find_by_group_pathes(pathes)
+        end
+      elsif cli_options.has_key?('all_namespaces') && cli_options.all_namespaces
+        groups = spinner('Loading selected gitlab groups...') do
+          Gitmylab::Gitlab::Group.all
+        end
+      end
+      count_message('group', groups)
+      groups
+    end
 
-      selections = get_selections(cli_options)
-      projects = Gitmylab::Gitlab::Project.filter_by_projects_and_groups(selections)
-      if projects.count > 0
-        path_array = projects.collect{|p| p.path }
+    def count_message(item_name, enumerable)
+      if enumerable.count > 0
+        path_array = enumerable.collect{|p| p.path }
         @path_max_length = path_array.max_by{|a|a.length}.length
-        many = projects.count > 1 ? true : false
-        spinner.stop(" Done")
-        m = Cli::Message.new("#{projects.count} project#{'s' if many} found")
+        many = enumerable.count > 1 ? true : false
+        m = Cli::Message.new("#{enumerable.count} #{item_name}#{'s' if many} found")
         m.indent        = 0
         m.prepend       = '==> '
         m.color         = status_color(:success)
         m.start_newline = true
         m.end_newline   = true
         m.render
-        projects
+
       else
-        spinner.stop(" Done")
-        m = Cli::Message.new('No projects found. Exiting...')
+        m = Cli::Message.new("No #{item_name} found.")
         m.indent        = 0
         m.prepend       = '==> '
         m.color         = status_color(:fail)
         m.start_newline = true
         m.end_newline   = true
         m.render
-        exit 1
       end
 
     end
 
-    def get_selections(cli_options)
+    def get_project_selections(cli_options)
 
       # set default to no project
       opi = []
@@ -99,14 +110,21 @@ module Gitmylab
       # finally add the exluded projects and groups from cli
       ope += cli_options.projects_exclude if cli_options.projects_exclude
       oge += cli_options.groups_exclude if cli_options.groups_exclude
-
       {
         :projects_include => opi,
         :projects_exclude => ope,
         :groups_include   => ogi,
         :groups_exclude   => oge,
       }
+    end
 
+
+    def spinner(msg, &block)
+      s = Cli::Spinner.new(msg)
+      s.run
+      enumerable = yield
+      s.stop(" Done")
+      enumerable
     end
 
     def project_iterator(options, enumerable, &block)

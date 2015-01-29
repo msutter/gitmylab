@@ -6,7 +6,8 @@ module Gitmylab
       def project_sync(cli_options)
         # reset results
         @sync_results = []
-        selected_projects = select_sync_projects(cli_options)
+        selected_projects = select_projects(cli_options)
+        exit 1 if selected_projects.empty?
         project_iterator cli_options, selected_projects do |project|
           sr = Utils::ProjectResult.new(project)
           group_dir = project.create_group_dir
