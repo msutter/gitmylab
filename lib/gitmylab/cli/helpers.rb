@@ -20,7 +20,8 @@ module Gitmylab
       end
 
       def options_valid?
-        ((@p || @n) ^ @ap ^ @c) || (((@g || @ag) && @u && @l) ^ @c)
+        # ((@p || @n) ^ @ap ^ @c) || (((@g || @ag) && @u && @l) ^ @c)
+        ((@p || @n) ^ (@ap || @ag) ^ @c) || (((@g || @ag) && @l) ^ @c ^ @u)
       end
 
       def options_invalid?

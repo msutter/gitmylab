@@ -8,12 +8,11 @@ module Gitmylab
       end
 
       def self.filter_by_selection(selections)
-        ogi = selections[:groups_include] || []
-        oge = selections[:groups_exclude] || []
-
+        gi = selections[:groups_include] || []
+        ge = selections[:groups_exclude] || []
         self.all.select do |group|
           # groups include/exclude
-          (ogi == :all || ogi.include?(group.path)) && !oge.include?(group.path)
+          (gi == :all || gi.include?(group.path)) && !ge.include?(group.path)
         end
       end
 
@@ -29,7 +28,7 @@ module Gitmylab
 
       def members
         attributes = [id]
-        @members_cache ||= list(Gitlab, :group_members, attributes)
+        @members_cache ||= list(::Gitlab, :group_members, attributes)
       end
 
       def member?(user)

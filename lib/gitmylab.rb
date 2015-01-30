@@ -16,7 +16,6 @@ module Gitmylab
 
   require_relative "gitmylab/utils/helpers"
   require_relative "gitmylab/utils/config"
-  require_relative "gitmylab/utils/project_result"
 
   require_relative "gitmylab/gitlab/base"
   require_relative "gitmylab/gitlab/user"
@@ -31,7 +30,7 @@ module Gitmylab
   require_relative 'gitmylab/cli/project'
   require_relative 'gitmylab/cli/branch'
   require_relative 'gitmylab/cli/access'
-
+  require_relative "gitmylab/cli/result"
   require_relative 'gitmylab/cli/color'
   require_relative 'gitmylab/cli/message'
   require_relative 'gitmylab/cli/spinner'

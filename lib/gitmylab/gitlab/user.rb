@@ -6,6 +6,12 @@ module Gitmylab
         :users
       end
 
+      def self.select_by_usernames(usernames)
+        self.all.select do |user|
+          usernames.include?(user.username)
+        end
+      end
+
       def initialize(gitlab_object)
         @groups = []
         super(gitlab_object)

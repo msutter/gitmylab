@@ -8,8 +8,8 @@ module Gitmylab
         @sync_results = []
         selected_projects = select_projects(cli_options)
         exit 1 if selected_projects.empty?
-        project_iterator cli_options, selected_projects do |project|
-          sr = Utils::ProjectResult.new(project)
+        cli_iterator cli_options, selected_projects do |project|
+          sr = Cli::Result.new(project)
           group_dir = project.create_group_dir
           # check if project directory exists to update/clone
           if File.directory?(project.location)

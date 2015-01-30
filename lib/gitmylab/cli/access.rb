@@ -15,6 +15,7 @@ module Gitmylab
         :type    => :boolean,
         :desc    => 'Apply to all groups'
 
+
       desc "add", "Add gitlab access"
       option :users,
         :aliases  => '-u',
@@ -52,6 +53,18 @@ module Gitmylab
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
         m.access_remove(options)
+      end
+
+      desc "list", "List gitlab access"
+      option :users,
+        :aliases  => '-u',
+        :type     => :array,
+        :desc     => 'The name of the users. This is the email address user part (the string before the "@")'
+
+      def list
+        options_check(shell, command, options)
+        m = Gitmylab::Manager.new(command, __method__)
+        m.access_list(options)
       end
 
     end

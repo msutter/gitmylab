@@ -32,7 +32,6 @@ module Gitmylab
         project_selection = get_project_selections(cli_options)
         Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
       end
-
       count_message('project', projects)
       projects
     end
@@ -99,7 +98,7 @@ module Gitmylab
         pi = cli_options.projects_include ? cli_options.projects_include : :all
         ni = cli_options.namespaces_include ? cli_options.namespaces_include : :all
 
-      when cli_options.all then
+      when cli_options.all_projects then
         pi = :all
         ni = :all
 
@@ -127,8 +126,8 @@ module Gitmylab
       }
     end
 
-
     def spinner(msg, &block)
+      horizontal_rule :width => terminal_width
       s = Cli::Spinner.new(msg)
       s.run
       enumerable = yield
@@ -136,10 +135,10 @@ module Gitmylab
       enumerable
     end
 
-    def project_iterator(options, enumerable, &block)
-
+    def cli_iterator(options, enumerable, &block)
+      item_name = enumerable.first.class.name.split(':').last.downcase
       syncing_bar = Cli::SyncingBar.new(
-        :title                => "#{@command.to_s} #{@action.to_s} ",
+        :title                => "#{@command.to_s} #{@action.to_s} for #{item_name} ",
         :total                => enumerable.count,
         :sub_title_max_length => @path_max_length,
       )
@@ -153,7 +152,7 @@ module Gitmylab
         begin
           yield item
         rescue => e
-          sr         = Utils::ProjectResult.new(item)
+          sr         = Cli::Result.new(item)
           sr.command = @command
           sr.action  = @action
           sr.status  = :fail

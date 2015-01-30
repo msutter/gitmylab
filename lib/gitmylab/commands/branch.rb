@@ -6,9 +6,9 @@ module Gitmylab
       def branch_list(cli_options)
         selected_projects = select_projects(cli_options)
         exit 1 if selected_projects.empty?
-        project_iterator cli_options, selected_projects do |project|
+        cli_iterator cli_options, selected_projects do |project|
           branches   = project.branches
-          sr         = Utils::ProjectResult.new(project)
+          sr         = Cli::Result.new(project)
           sr.command = @command
           sr.action  = @action
           sr.status  = :empty
@@ -27,8 +27,8 @@ module Gitmylab
       def branch_add(cli_options)
         selected_projects = select_projects(cli_options)
         exit 1 if selected_projects.empty?
-        project_iterator cli_options, selected_projects do |project|
-          sr         = Utils::ProjectResult.new(project)
+        cli_iterator cli_options, selected_projects do |project|
+          sr         = Cli::Result.new(project)
           sr.command = @command
           sr.action  = @action
           if project.branches.any? {|b| b.name == cli_options['name']}
@@ -54,8 +54,8 @@ module Gitmylab
       def branch_protect(cli_options)
         selected_projects = select_projects(cli_options)
         exit 1 if selected_projects.empty?
-        project_iterator cli_options, selected_projects do |project|
-          sr         = Utils::ProjectResult.new(project)
+        cli_iterator cli_options, selected_projects do |project|
+          sr         = Cli::Result.new(project)
           sr.command = @command
           sr.action  = @action
 
@@ -79,8 +79,8 @@ module Gitmylab
       def branch_unprotect(cli_options)
         selected_projects = select_projects(cli_options)
         exit 1 if selected_projects.empty?
-        project_iterator cli_options, selected_projects do |project|
-          sr         = Utils::ProjectResult.new(project)
+        cli_iterator cli_options, selected_projects do |project|
+          sr         = Cli::Result.new(project)
           sr.command = @command
           sr.action  = @action
 
