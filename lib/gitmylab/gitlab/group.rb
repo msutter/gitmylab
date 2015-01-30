@@ -7,6 +7,16 @@ module Gitmylab
         :groups
       end
 
+      def self.filter_by_selection(selections)
+        ogi = selections[:groups_include] || []
+        oge = selections[:groups_exclude] || []
+
+        self.all.select do |group|
+          # groups include/exclude
+          (ogi == :all || ogi.include?(group.path)) && !oge.include?(group.path)
+        end
+      end
+
       def self.find_by_group_pathes(pathes)
         self.all.select do |group|
           pathes.include?(group.path)

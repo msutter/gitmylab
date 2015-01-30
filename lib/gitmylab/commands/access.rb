@@ -5,9 +5,10 @@ module Gitmylab
 
       def access_add(cli_options)
 
+
         selected_projects = select_projects(cli_options)
         selected_groups = select_groups(cli_options)
-
+binding.pry
         item_count = selected_projects.count + selected_groups.count
         if item_count == 0
           puts 'No Items found Exiting....'.red

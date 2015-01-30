@@ -4,7 +4,7 @@ module Gitmylab
 
       @@config = nil
 
-      def self.create_from_config(config)
+      def self.select_from_config(config)
 
       end
 

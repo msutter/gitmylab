@@ -7,7 +7,7 @@ module Gitmylab
         :projects
       end
 
-      def self.filter_by_projects_and_groups(selections)
+      def self.filter_by_selection(selections)
 
         opi = selections[:projects_include]
         ope = selections[:projects_exclude]

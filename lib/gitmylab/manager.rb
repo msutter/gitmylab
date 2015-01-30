@@ -29,27 +29,36 @@ module Gitmylab
 
     def select_projects(cli_options)
       projects = spinner('Loading selected gitlab projects...') do
-        selections = get_project_selections(cli_options)
-        Gitmylab::Gitlab::Project.filter_by_projects_and_groups(selections)
+        project_selection = get_project_selections(cli_options)
+        Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
       end
+
       count_message('project', projects)
       projects
     end
 
     def select_groups(cli_options)
-      groups = []
-      if cli_options.has_key?('namespaces')
-        pathes = cli_options.namespaces ? cli_options.namespaces : []
-        groups = spinner('Loading selected gitlab groups...') do
-          Gitmylab::Gitlab::Group.find_by_group_pathes(pathes)
-        end
-      elsif cli_options.has_key?('all_namespaces') && cli_options.all_namespaces
-        groups = spinner('Loading selected gitlab groups...') do
-          Gitmylab::Gitlab::Group.all
-        end
+      group_selection = get_groups_selections(cli_options)
+      groups = spinner('Loading selected gitlab groups...') do
+        Gitmylab::Gitlab::Group.filter_by_selection(group_selection)
       end
       count_message('group', groups)
       groups
+    end
+
+    def get_groups_selections(cli_options)
+      groups_include = []
+      groups_exclude = []
+      case
+      when cli_options.has_key?('namespaces') then
+        groups_include = cli_options.namespaces ? cli_options.namespaces : []
+      when cli_options.has_key?('all_namespaces') && cli_options.all_namespaces then
+        groups_include = :all
+      end
+      {
+        :groups_include => groups_include
+        :groups_exclude => groups_include
+      }
     end
 
     def count_message(item_name, enumerable)
@@ -86,6 +95,10 @@ module Gitmylab
       oge = []
 
       case
+      when cli_options.projects || cli_options.groups then
+        opi = cli_options.projects ? cli_options.projects : :all
+        ogi = cli_options.groups ? cli_options.groups : :all
+
       when cli_options.all then
         opi = :all
         ogi = :all
@@ -101,10 +114,6 @@ module Gitmylab
 
         ope += config_options[:projects_exclude] if config_options[:projects_exclude]
         oge += config_options[:groups_exclude] if config_options[:groups_exclude]
-
-      when cli_options.projects || cli_options.groups then
-        opi = cli_options.projects ? cli_options.projects : :all
-        ogi = cli_options.groups ? cli_options.groups : :all
       end
 
       # finally add the exluded projects and groups from cli
