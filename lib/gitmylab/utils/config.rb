@@ -49,7 +49,7 @@ module Gitmylab
       def self.access_setup
         if configatron.access.has_key?(:access_config_files_project)
           sync_access_repo
-          location = Pathname.new(File.join(configatron.sync.gitlab_root_path, access_project.path_with_namespace))
+          location = Pathname.new(File.join(configatron.sync.gitlab_root_path, access_project.path_with_group))
         else
           location = @@local_config_path
         end
@@ -119,8 +119,8 @@ module Gitmylab
       end
 
       def self.load_config_file(file_path)
-        namespace = file_path.basename.sub(/\.yaml/, '').to_s
-        configatron.configure_from_hash(namespace => YAML::load_file(file_path))
+        group = file_path.basename.sub(/\.yaml/, '').to_s
+        configatron.configure_from_hash(group => YAML::load_file(file_path))
       end
 
 

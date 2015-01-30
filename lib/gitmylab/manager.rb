@@ -50,14 +50,14 @@ module Gitmylab
       groups_include = []
       groups_exclude = []
       case
-      when cli_options.has_key?('namespaces') then
-        groups_include = cli_options.namespaces ? cli_options.namespaces : []
-      when cli_options.has_key?('all_namespaces') && cli_options.all_namespaces then
+      when cli_options.has_key?('groups') then
+        groups_include = cli_options.groups ? cli_options.groups : []
+      when cli_options.has_key?('all_groups') && cli_options.all_groups then
         groups_include = :all
       end
       {
-        :groups_include => groups_include
-        :groups_exclude => groups_include
+        :groups_include => groups_include,
+        :groups_exclude => groups_exclude
       }
     end
 
@@ -89,41 +89,41 @@ module Gitmylab
     def get_project_selections(cli_options)
 
       # set default to no project
-      opi = []
-      ope = []
-      ogi = []
-      oge = []
+      pi = []
+      pe = []
+      ni = []
+      ne = []
 
       case
-      when cli_options.projects || cli_options.groups then
-        opi = cli_options.projects ? cli_options.projects : :all
-        ogi = cli_options.groups ? cli_options.groups : :all
+      when cli_options.projects_include || cli_options.namespaces_include then
+        pi = cli_options.projects_include ? cli_options.projects_include : :all
+        ni = cli_options.namespaces_include ? cli_options.namespaces_include : :all
 
       when cli_options.all then
-        opi = :all
-        ogi = :all
+        pi = :all
+        ni = :all
 
       when cli_options.config_file then
         config_options = {}
         config_options.merge!(configatron.include.to_hash) if configatron.has_key?(:include)
         config_options.merge!(configatron.exclude.to_hash) if configatron.has_key?(:exclude)
 
-        # set options defaults if nothing else defined (all projects in all groups)
-        opi = config_options[:projects_include] ? config_options[:projects_include] : :all
-        ogi = config_options[:groups_include]   ? config_options[:groups_include]   : :all
+        # set options defaults if nothing else defined (all projects in all namespaces)
+        pi = config_options[:projects_include] ? config_options[:projects_include] : :all
+        ni = config_options[:namespaces_include]   ? config_options[:namespaces_include]   : :all
 
-        ope += config_options[:projects_exclude] if config_options[:projects_exclude]
-        oge += config_options[:groups_exclude] if config_options[:groups_exclude]
+        pe += config_options[:projects_exclude] if config_options[:projects_exclude]
+        ne += config_options[:namespaces_exclude] if config_options[:namespaces_exclude]
       end
 
-      # finally add the exluded projects and groups from cli
-      ope += cli_options.projects_exclude if cli_options.projects_exclude
-      oge += cli_options.groups_exclude if cli_options.groups_exclude
+      # finally add the exluded projects and namespaces from cli
+      pe += cli_options.projects_exclude if cli_options.projects_exclude
+      ne += cli_options.namespaces_exclude if cli_options.namespaces_exclude
       {
-        :projects_include => opi,
-        :projects_exclude => ope,
-        :groups_include   => ogi,
-        :groups_exclude   => oge,
+        :projects_include   => pi,
+        :projects_exclude   => pe,
+        :namespaces_include => ni,
+        :namespaces_exclude => ne,
       }
     end
 

@@ -9,16 +9,16 @@ module Gitmylab
 
       def self.filter_by_selection(selections)
 
-        opi = selections[:projects_include]
-        ope = selections[:projects_exclude]
-        ogi = selections[:groups_include]
-        oge = selections[:groups_exclude]
+        pi = selections[:projects_include]
+        pe = selections[:projects_exclude]
+        ni = selections[:namespaces_include]
+        ne = selections[:namespaces_exclude]
 
         self.all.select do |project|
           # projects include/exclude
-          (opi == :all || opi.include?(project.path)) && !ope.include?(project.path) and
-          # groups include/exclude
-          (ogi == :all || ogi.include?(project.namespace.path)) && !oge.include?(project.namespace.path)
+          (pi == :all || pi.include?(project.path)) && !pe.include?(project.path) and
+          # namespaces include/exclude
+          (ni == :all || ni.include?(project.group.path)) && !ne.include?(project.group.path)
         end
       end
 

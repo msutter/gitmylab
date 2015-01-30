@@ -5,15 +5,15 @@ module Gitmylab
 
       include Helpers
 
-      class_option :namespaces,
-        :aliases => '-n',
+      class_option :groups,
+        :aliases => '-g',
         :type    => :array,
-        :desc    => 'Apply to given namespaces (groups). This is not the same as [-g], which would apply to projects in the given groups'
+        :desc    => 'Apply to given groups (groups). This is not the same as [-g], which would apply to projects in the given groups'
 
-      class_option :all_namespaces,
+      class_option :all_groups,
         :aliases => '-A',
         :type    => :boolean,
-        :desc    => 'Apply to all namespaces (groups)'
+        :desc    => 'Apply to all groups (groups)'
 
       desc "add", "Add gitlab access"
       option :users,

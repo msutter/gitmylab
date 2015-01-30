@@ -7,20 +7,20 @@ module Gitmylab
 
       def options_check(shell, command, options)
         @c  = options[:config_file]
-        @a  = options[:all]
-        @p  = options[:projects] ? options[:projects].any? : false
-        @g  = options[:groups] ? options[:groups].any? : false
-        @n  = options[:namespaces] ? options[:namespaces].any? : false
+        @p  = options[:projects_include] ? options[:projects_include].any? : false
+        @ap = options[:all_projects]
+        @n  = options[:namespaces_include] ? options[:namespaces_include].any? : false
+        @g  = options[:groups_include] ? options[:groups_include].any? : false
+        @ag = options[:all_groups]
         @u  = options[:users] ? options[:users].any? : false
         @l  = options[:level] ? true : false
-        @an = options[:all_namespaces]
 
         options_help if options_invalid?
 
       end
 
       def options_valid?
-        ((@p || @g) ^ @a ^ @c) || (((@n || @an) && @u && @l) ^ @c)
+        ((@p || @n) ^ @ap ^ @c) || (((@g || @ag) && @u && @l) ^ @c)
       end
 
       def options_invalid?

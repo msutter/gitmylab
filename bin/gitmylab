@@ -68,12 +68,12 @@ end
 
 class GitmylabCli < Thor
 
-  class_option  :all,
+  class_option  :all_projects,
                 :aliases => '-a',
                 :type    => :boolean,
-                :desc    => 'Apply to all projects in all groups'
+                :desc    => 'Apply to all projects in all namespaces'
 
-  class_option  :projects,
+  class_option  :projects_include,
                 :type    => :array,
                 :aliases => '-p',
                 :desc    => 'Apply to given projects'
@@ -82,14 +82,14 @@ class GitmylabCli < Thor
                 :type    => :array,
                 :desc    => 'Exclude given projects'
 
-  class_option  :groups,
+  class_option  :namespaces_include,
                 :type    => :array,
-                :aliases => '-g',
-                :desc    => 'Apply to projects in given groups'
+                :aliases => '-n',
+                :desc    => 'Apply to projects in given namespaces'
 
-  class_option  :groups_exclude,
+  class_option  :namespaces_exclude,
                 :type    => :array,
-                :desc    => 'Exclude projects in given groups'
+                :desc    => 'Exclude projects in given namespaces'
 
   class_option  :config_file,
                 :aliases => '-c',

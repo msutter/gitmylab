@@ -130,7 +130,7 @@ module Gitmylab
       end
 
       def group_pathes
-        @results.collect{|r| r.project.namespace.path}
+        @results.collect{|r| r.project.group.path}
       end
 
       def project_locations
