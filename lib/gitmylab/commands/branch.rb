@@ -6,7 +6,7 @@ module Gitmylab
       def branch(cli_options)
         selected_projects = select_projects(cli_options)
         exit 1 if selected_projects.empty?
-        cli_iterator cli_options, selected_projects do |project|
+        cli_iterator selected_projects do |project|
           sr         = Cli::Result.new(project)
           sr.command = @command
           sr.action  = @action

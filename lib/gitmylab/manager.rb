@@ -27,6 +27,26 @@ module Gitmylab
 
     private
 
+    def select_items(cli_options)
+      items = spinner('Loading selected gitlab objects...') do
+        project_selection = get_project_selections(cli_options)
+        projects = Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
+        group_selection = get_groups_selections(cli_options)
+        groups = Gitmylab::Gitlab::Group.filter_by_selection(group_selection)
+        projects + groups
+      end
+      count_message('item', items)
+      items
+    end
+
+    def select_groups(cli_options)
+      groups = spinner('Loading selected gitlab groups...') do
+        Gitmylab::Gitlab::Group.filter_by_selection(group_selection)
+      end
+      count_message('group', groups)
+      groups
+    end
+
     def select_projects(cli_options)
       projects = spinner('Loading selected gitlab projects...') do
         project_selection = get_project_selections(cli_options)
@@ -43,46 +63,6 @@ module Gitmylab
       end
       count_message('group', groups)
       groups
-    end
-
-    def get_groups_selections(cli_options)
-      groups_include = []
-      groups_exclude = []
-      case
-      when cli_options.has_key?('groups') then
-        groups_include = cli_options.groups ? cli_options.groups : []
-      when cli_options.has_key?('all_groups') && cli_options.all_groups then
-        groups_include = :all
-      end
-      {
-        :groups_include => groups_include,
-        :groups_exclude => groups_exclude
-      }
-    end
-
-    def count_message(item_name, enumerable)
-      if enumerable.count > 0
-        path_array = enumerable.collect{|p| p.path }
-        @path_max_length = path_array.max_by{|a|a.length}.length
-        many = enumerable.count > 1 ? true : false
-        m = Cli::Message.new("#{enumerable.count} #{item_name}#{'s' if many} found")
-        m.indent        = 0
-        m.prepend       = '==> '
-        m.color         = status_color(:success)
-        m.start_newline = true
-        m.end_newline   = true
-        m.render
-
-      else
-        m = Cli::Message.new("No #{item_name} found.")
-        m.indent        = 0
-        m.prepend       = '==> '
-        m.color         = status_color(:fail)
-        m.start_newline = true
-        m.end_newline   = true
-        m.render
-      end
-
     end
 
     def get_project_selections(cli_options)
@@ -126,6 +106,46 @@ module Gitmylab
       }
     end
 
+    def get_groups_selections(cli_options)
+      groups_include = []
+      groups_exclude = []
+      case
+      when cli_options.has_key?('groups') then
+        groups_include = cli_options.groups ? cli_options.groups : []
+      when cli_options.has_key?('all_groups') && cli_options.all_groups then
+        groups_include = :all
+      end
+      {
+        :groups_include => groups_include,
+        :groups_exclude => groups_exclude
+      }
+    end
+
+    def count_message(item_name, enumerable)
+      if enumerable.count > 0
+        path_array = enumerable.collect{|p| p.path }
+        @path_max_length = path_array.max_by{|a|a.length}.length
+        many = enumerable.count > 1 ? true : false
+        m = Cli::Message.new("#{enumerable.count} #{item_name}#{'s' if many} found")
+        m.indent        = 0
+        m.prepend       = '==> '
+        m.color         = status_color(:success)
+        m.start_newline = true
+        m.end_newline   = true
+        m.render
+
+      else
+        m = Cli::Message.new("No #{item_name} found.")
+        m.indent        = 0
+        m.prepend       = '==> '
+        m.color         = status_color(:fail)
+        m.start_newline = true
+        m.end_newline   = true
+        m.render
+      end
+
+    end
+
     def spinner(msg, &block)
       horizontal_rule :width => terminal_width
       s = Cli::Spinner.new(msg)
@@ -135,7 +155,7 @@ module Gitmylab
       enumerable
     end
 
-    def cli_iterator(options, enumerable, &block)
+    def cli_iterator(enumerable, &block)
       item_name = class_lastname(enumerable.first).downcase
       syncing_bar = Cli::SyncingBar.new(
         :title                => "#{@command.to_s} #{@action.to_s} for #{item_name} ",
@@ -149,16 +169,16 @@ module Gitmylab
         syncing_bar.increment(item.path)
         syncing_bar.pause
         horizontal_rule :width => terminal_width
-        begin
+        # begin
           yield item
-        rescue => e
-          sr         = Cli::Result.new(item)
-          sr.command = @command
-          sr.action  = @action
-          sr.status  = :fail
-          sr.message = e.message
-          sr.render
-        end
+        # rescue => e
+        #   sr         = Cli::Result.new(item)
+        #   sr.command = @command
+        #   sr.action  = @action
+        #   sr.status  = :fail
+        #   sr.message = e.message
+        #   sr.render
+        # end
       end
       syncing_bar.finish
 

@@ -61,8 +61,12 @@ module Gitmylab
           end
         end
 
+        attr_accessor :permissions, :members_permissions
+
         def initialize(gitlab_object)
           @gitlab_object = gitlab_object
+          @permissions   = []
+          @member_permissions = nil
 
           # auto-generate instance methods based on the gitlab @data hash
           gitlab_object.instance_variable_get(:@data).each do |key, value|

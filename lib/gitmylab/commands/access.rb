@@ -8,19 +8,71 @@ module Gitmylab
       Tab         = '.' + ' '*(LeftAdjust+RightAdjust+3)
 
       def access(cli_options)
-        selected_projects = select_projects(cli_options)
-        if selected_projects.any?
-          access_iterator(cli_options, selected_projects)
-        end
+        roles = []
 
-        selected_groups = select_groups(cli_options)
-        if selected_groups.any?
-          access_iterator(cli_options, selected_groups)
+        if cli_options['config_file']
+          #roles = parsed_config
+        else
+          selected_items = select_items(cli_options)
+          permissions = []
+          selected_items.each do |item|
+            if cli_options['users']
+              cli_options['users'].each do |username|
+                item.permissions << Gitmylab::Access::Permission.new(username, item, cli_options['level'], cli_options['regression'])
+              end
+            else
+              item.permissions << Gitmylab::Access::Permission.new(nil, item, cli_options['level'], cli_options['regression'])
+            end
+          end
+          access_role_iterator(selected_items)
         end
       end
 
+      def access_role_iterator(items)
+
+        cli_iterator items do |item|
+          sr         = Cli::Result.new(item)
+          sr.command = @command
+          sr.action  = @action
+          sr.message = ''
+
+          if item.permissions.any?
+            item.permissions.each do |permission|
+              if permission.user
+                case @action
+                when :list
+                  if permission.list
+                    sr.message << "#{(permission.user.username + ' / ' + permission.user.name).ljust(LeftAdjust)} => #{' '*RightAdjust + permission.access_level.to_s}\n"
+                    sr.status  = :success
+                  else
+                    sr.message << "#{(permission.user.username + '/' + permission.user.name).ljust(LeftAdjust)} => #{' '*RightAdjust}No direct access to #{item.path}\n"
+                    sr.status  = :skip
+                  end
+                when :add
+                when :remove
+                end
+              elsif permission.username.nil?
+                item.members.each do |member|
+                  user = Gitmylab::Gitlab::User.find_by_username(member.username).first
+                  sr.message << "#{(member.username + ' / ' + user.name).ljust(LeftAdjust)} => #{' '*RightAdjust + member.access_level.to_s}\n"
+                  sr.status  = :success
+                end
+              else
+                sr.status  = :skip
+                sr.message << "User #{permission.username} not found !\n"
+              end
+            end
+          else
+            sr.message << "No members found for #{item.path}\n"
+            sr.status  = :empty
+          end
+          sr.render
+        end
+      end
+
+
       def access_iterator(cli_options, enumerable)
-        cli_iterator cli_options, enumerable do |item|
+        cli_iterator enumerable do |item|
           sr         = Cli::Result.new(item)
           sr.command = @command
           sr.action  = @action

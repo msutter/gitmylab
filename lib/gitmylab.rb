@@ -27,6 +27,7 @@ module Gitmylab
   require_relative "gitmylab/access/group"
   require_relative "gitmylab/access/project"
   require_relative "gitmylab/access/permission"
+  require_relative "gitmylab/access/role"
 
   require_relative 'gitmylab/cli/helpers'
   require_relative 'gitmylab/cli/project'

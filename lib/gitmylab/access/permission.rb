@@ -4,27 +4,35 @@ module Gitmylab
 
       include Utils::Helpers
 
-      def initialize(user, item, access_level=nil)
-        @user              = user
+      attr_accessor :username, :access_level, :regression 
+
+      def initialize(username, item, access_level=nil, regression=nil)
+        @username          = username
         @item              = item
         @access_level      = access_level
-        @item_access_class = "Gitmylab::Access::#{class_lastname(@item)}".constantize
+        @regression        = regression
+        @item_class_name   = class_lastname(@item)
+        @item_access_class = "Gitmylab::Access::#{@item_class_name}".constantize
       end
 
       def list
-        p = @item_access_class.new(@user, @item)
+        p = @item_access_class.new(user, @item)
         @access_level = p.get
         @access_level ? @access_level.to_s : nil
       end
 
-      def create(options)
-        p = @item_access_class.new(@user, @item)
-        p.set(@access_level, options)
+      def create
+        p = @item_access_class.new(user, @item)
+        p.set(@access_level, @regression)
       end
 
       def remove
-        p = @item_access_class.new(@user, @item)
+        p = @item_access_class.new(user, @item)
         p.delete
+      end
+
+      def user
+        @user ||= Gitmylab::Gitlab::User.find_by_username(@username).first
       end
 
     end

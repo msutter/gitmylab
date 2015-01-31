@@ -11,7 +11,7 @@ module Gitmylab
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
         Gitmylab::Cli::Message.level = options.verbosity
-        m.project_sync(options)
+        m.project(options)
       end
 
     end

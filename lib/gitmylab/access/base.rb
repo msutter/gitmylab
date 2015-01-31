@@ -39,7 +39,7 @@ module Gitmylab
       end
 
       # update access_level. User access level regression are disabled by default (:regression => false)
-      def set(access_name, options={:regression => false})
+      def set(access_name, regression)
         access_id           = self.class.access_id(access_name.to_sym)
         current_access_name = get
         current_access_id   = current_access_name ? self.class.access_id(current_access_name) : nil
@@ -48,7 +48,7 @@ module Gitmylab
         unless current_access_id == access_id
           # only do if wanted access does not exists or is higher than current access.
           # note: you can force regression
-          if current_access_id.nil? || options[:regression] || current_access_id < access_id
+          if current_access_id.nil? || regression || current_access_id < access_id
             remove if current_access_id
             create(access_id)
             OpenStruct.new(
