@@ -23,22 +23,24 @@ module Gitmylab
         access_name.first
       end
 
-      def initialize(user, target)
+      def initialize(user, item)
         @user    = user
-        @target  = target
+        @item  = item
       end
 
       def get
-        member = @target.members.detect{|m| m.id == @user.id}
+        member = @item.members.detect{|m| m.id == @user.id}
         if member
           current_access_id = member.access_level
           self.class.access_name(current_access_id)
+        else
+          nil
         end
       end
 
       # update access_level. User access level regression are disabled by default (:regression => false)
       def set(access_name, options={:regression => false})
-        access_id           = self.class.access_id(access_name)
+        access_id           = self.class.access_id(access_name.to_sym)
         current_access_name = get
         current_access_id   = current_access_name ? self.class.access_id(current_access_name) : nil
 

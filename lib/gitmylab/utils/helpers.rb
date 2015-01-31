@@ -82,6 +82,10 @@ module Gitmylab
 
       end
 
+      def class_lastname(klass)
+        klass.class.name.split(':').last
+      end
+
       def self.included(receiver)
         receiver.extend         ClassMethods
         receiver.send :include, InstanceMethods

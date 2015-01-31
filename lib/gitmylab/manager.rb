@@ -136,7 +136,7 @@ module Gitmylab
     end
 
     def cli_iterator(options, enumerable, &block)
-      item_name = enumerable.first.class.name.split(':').last.downcase
+      item_name = class_lastname(enumerable.first).downcase
       syncing_bar = Cli::SyncingBar.new(
         :title                => "#{@command.to_s} #{@action.to_s} for #{item_name} ",
         :total                => enumerable.count,

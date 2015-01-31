@@ -1,6 +1,7 @@
 require 'yaml'
 require 'fileutils'
 require 'open4'
+require 'active_support/inflector'
 require 'gitlab'
 require 'git'
 require 'active_directory'
@@ -25,6 +26,7 @@ module Gitmylab
   require_relative "gitmylab/access/base"
   require_relative "gitmylab/access/group"
   require_relative "gitmylab/access/project"
+  require_relative "gitmylab/access/permission"
 
   require_relative 'gitmylab/cli/helpers'
   require_relative 'gitmylab/cli/project'

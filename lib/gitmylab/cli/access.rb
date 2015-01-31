@@ -39,7 +39,7 @@ module Gitmylab
       def add
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.access_add(options)
+        m.access(options)
       end
 
       desc "remove", "Remove gitlab access"
@@ -52,7 +52,7 @@ module Gitmylab
       def remove
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.access_remove(options)
+        m.access(options)
       end
 
       desc "list", "List gitlab access"
@@ -64,7 +64,7 @@ module Gitmylab
       def list
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.access_list(options)
+        m.access(options)
       end
 
     end

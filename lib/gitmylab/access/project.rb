@@ -4,7 +4,7 @@ module Gitmylab
 
       def initialize(user, project)
         super(user, project)
-        @project = @target
+        @project = @item
       end
 
       private
