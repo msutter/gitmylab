@@ -97,10 +97,11 @@ class GitmylabCli < Thor
                 :desc    => 'Apply to projects defined in the include/exclude config files'
 
   class_option  :verbosity,
-                :enum    => [:detailed, :info, :silent],
-                :default => :detailed,
+                :type    => :string,
+                :enum    => ['detailed', 'info', 'silent'],
+                :default => 'detailed',
                 :aliases => '-v',
-                :desc    => 'Apply to all projects'
+                :desc    => 'Verbosity'
 
   # desc "project", "syncronize gitlab repository"
 
