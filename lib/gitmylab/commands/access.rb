@@ -49,9 +49,15 @@ module Gitmylab
                   else "Access Level #{cli_options['level']} set for #{user.username}\n"
                   end
                 when :remove
-                  r = permission.remove
-                  sr.status = r.status
-                  sr.message << "Access for #{user.username} removed.\n"
+                  access_level = permission.list
+                  if permission.list
+                    r = permission.remove
+                    sr.status = :success
+                    sr.message << "Access #{access_level} removed for #{user.username}.\n"
+                  else
+                    sr.message << "User #{user.username} already has no access.\n"
+                    sr.status = :skip
+                  end
                 end
               else
                 sr.status  = :skip
