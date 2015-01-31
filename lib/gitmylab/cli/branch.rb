@@ -9,13 +9,13 @@ module Gitmylab
       def list
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.branch_list(options)
+        m.branch(options)
       end
 
       desc "add", "Add a branch to gitlab projects"
 
-      option :name,
-        :aliases  => '-n',
+      option :branch_name,
+        :aliases  => '-b',
         :type     => :string,
         :desc     => 'The name of the new branch',
         :required => true
@@ -32,35 +32,38 @@ module Gitmylab
         :desc    => 'By default, the new branch will be unprotected. Use this option to protect the new branch',
         :default => false
 
-
       def add
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.branch_add(options)
+        m.branch(options)
       end
 
       desc "protect", "Protect a branch of gitlab projects"
-      option :name,
-        :aliases  => '-n',
+
+      option :branch_name,
+        :aliases  => '-b',
         :type     => :string,
-        :desc     => 'The name of the branch',
+        :desc     => 'The name of the new branch',
         :required => true
+
       def protect
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.branch_protect(options)
+        m.branch(options)
       end
 
       desc "unprotect", "Unprotect a branch of gitlab projects"
-      option :name,
-        :aliases  => '-n',
+
+      option :branch_name,
+        :aliases  => '-b',
         :type     => :string,
-        :desc     => 'The name of the branch',
+        :desc     => 'The name of the new branch',
         :required => true
+
       def unprotect
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)
-        m.branch_unprotect(options)
+        m.branch(options)
       end
 
     end
