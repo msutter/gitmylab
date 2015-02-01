@@ -37,6 +37,7 @@ module Gitmylab
     private
 
     def select_items(cli_options)
+      Gitmylab::Cli::Message.level = cli_options['verbosity'].to_sym
       horizontal_rule :width => terminal_width
       items = spinner('Loading selected gitlab objects...') do
         project_selection = get_project_selections(cli_options)
@@ -47,32 +48,6 @@ module Gitmylab
       end
       count_message('item', items)
       items
-    end
-
-    def select_groups(cli_options)
-      groups = spinner('Loading selected gitlab groups...') do
-        Gitmylab::Gitlab::Group.filter_by_selection(group_selection)
-      end
-      count_message('group', groups)
-      groups
-    end
-
-    def select_projects(cli_options)
-      projects = spinner('Loading selected gitlab projects...') do
-        project_selection = get_project_selections(cli_options)
-        Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
-      end
-      count_message('project', projects)
-      projects
-    end
-
-    def select_groups(cli_options)
-      group_selection = get_groups_selections(cli_options)
-      groups = spinner('Loading selected gitlab groups...') do
-        Gitmylab::Gitlab::Group.filter_by_selection(group_selection)
-      end
-      count_message('group', groups)
-      groups
     end
 
     def get_project_selections(cli_options)
