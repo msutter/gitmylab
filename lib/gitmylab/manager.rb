@@ -137,16 +137,16 @@ module Gitmylab
         syncing_bar.increment(item.path)
         syncing_bar.pause
         horizontal_rule :width => terminal_width if Cli::Message.level > 0
-        # begin
-        yield item
-        # rescue => e
-        #   sr         = Cli::Result.new(item)
-        #   sr.command = @command
-        #   sr.action  = @action
-        #   sr.status  = :fail
-        #   sr.message = e.message
-        #   sr.render
-        # end
+        begin
+          yield item
+        rescue => e
+          sr         = Cli::Result.new(item)
+          sr.command = @command
+          sr.action  = @action
+          sr.status  = :fail
+          sr.message = e.message
+          sr.render
+        end
       end
       syncing_bar.finish
 
