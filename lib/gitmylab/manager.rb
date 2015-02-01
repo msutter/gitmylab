@@ -25,20 +25,11 @@ module Gitmylab
     #   r.render
     # end
 
-    # def self.spinner(msg, &block)
-    #   s = Cli::Spinner.new(msg)
-    #   s.run
-    #   enumerable = yield
-    #   s.stop(" Done")
-    #   puts "\n"
-    #   enumerable
-    # end
-
     private
 
     def select_items(cli_options)
       Gitmylab::Cli::Message.level = cli_options['verbosity'].to_sym
-      horizontal_rule :width => terminal_width
+      horizontal_rule :width => terminal_width if Gitmylab::Cli::Message.level > 0
       items = spinner('Loading selected gitlab objects...') do
         project_selection = get_project_selections(cli_options)
         projects = Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
@@ -141,11 +132,11 @@ module Gitmylab
       )
 
       enumerable.each do |item|
-        horizontal_rule :width => terminal_width
+        horizontal_rule :width => terminal_width if Cli::Message.level > 0
         syncing_bar.resume
         syncing_bar.increment(item.path)
         syncing_bar.pause
-        horizontal_rule :width => terminal_width
+        horizontal_rule :width => terminal_width if Cli::Message.level > 0
         # begin
         yield item
         # rescue => e

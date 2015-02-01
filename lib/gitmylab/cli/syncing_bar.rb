@@ -24,9 +24,11 @@ module Gitmylab
       end
 
       def increment(sub_title='')
-        @sub_title = sub_title
-        bar.title = full_title
-        bar.increment if Cli::Message.level > 0
+        if Cli::Message.level > 0
+          @sub_title = sub_title
+          bar.title = full_title
+          bar.increment
+        end
       end
 
       def finish
