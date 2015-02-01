@@ -24,7 +24,7 @@ module Gitmylab
       end
 
       def initialize(user, item)
-        @user    = user
+        @user  = user
         @item  = item
       end
 

@@ -25,9 +25,19 @@ module Gitmylab
     #   r.render
     # end
 
+    # def self.spinner(msg, &block)
+    #   s = Cli::Spinner.new(msg)
+    #   s.run
+    #   enumerable = yield
+    #   s.stop(" Done")
+    #   puts "\n"
+    #   enumerable
+    # end
+
     private
 
     def select_items(cli_options)
+      horizontal_rule :width => terminal_width
       items = spinner('Loading selected gitlab objects...') do
         project_selection = get_project_selections(cli_options)
         projects = Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
@@ -130,7 +140,7 @@ module Gitmylab
         m.indent        = 0
         m.prepend       = '==> '
         m.color         = status_color(:success)
-        m.start_newline = true
+        m.start_newline = false
         m.end_newline   = true
         m.render
 
@@ -139,21 +149,13 @@ module Gitmylab
         m.indent        = 0
         m.prepend       = '==> '
         m.color         = status_color(:fail)
-        m.start_newline = true
+        m.start_newline = false
         m.end_newline   = true
         m.render
       end
 
     end
 
-    def spinner(msg, &block)
-      horizontal_rule :width => terminal_width
-      s = Cli::Spinner.new(msg)
-      s.run
-      enumerable = yield
-      s.stop(" Done")
-      enumerable
-    end
 
     def cli_iterator(enumerable, &block)
       item_name = class_lastname(enumerable.first).downcase
@@ -170,7 +172,7 @@ module Gitmylab
         syncing_bar.pause
         horizontal_rule :width => terminal_width
         # begin
-          yield item
+        yield item
         # rescue => e
         #   sr         = Cli::Result.new(item)
         #   sr.command = @command

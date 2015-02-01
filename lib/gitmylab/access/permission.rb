@@ -4,7 +4,7 @@ module Gitmylab
 
       include Utils::Helpers
 
-      attr_accessor :username, :access_level, :regression 
+      attr_accessor :username, :access_level, :regression
 
       def initialize(username, item, access_level=nil, regression=nil)
         @username          = username
@@ -17,7 +17,9 @@ module Gitmylab
 
       def list
         p = @item_access_class.new(user, @item)
-        @access_level = p.get
+        # Gitmylab::Manager.spinner "Loading #{@item_class_name} members..." do
+          @access_level = p.get
+        # end
         @access_level ? @access_level.to_s : nil
       end
 

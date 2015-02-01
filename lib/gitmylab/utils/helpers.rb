@@ -91,6 +91,15 @@ module Gitmylab
         receiver.send :include, InstanceMethods
       end
 
+      def spinner(msg, &block)
+        s = Cli::Spinner.new(msg)
+        s.run
+        enumerable = yield
+        s.stop(" Done")
+        puts "\n\n"
+        enumerable
+      end
+
     end
 
   end
