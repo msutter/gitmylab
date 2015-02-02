@@ -4,7 +4,7 @@ module Gitmylab
 
       include Utils::Helpers
 
-      attr_accessor :username, :access_level, :regression
+      attr_accessor :username, :access_level, :regression, :item
 
       def initialize(username, item, access_level=nil, regression=nil)
         @username          = username
@@ -35,6 +35,14 @@ module Gitmylab
 
       def user
         @user ||= Gitmylab::Gitlab::User.find_by_username(@username).first
+      end
+
+      def type
+        @item_class_name
+      end
+
+      def to_s
+        "#{@item.path}: #{@username} ==> #{@access_level}"
       end
 
     end

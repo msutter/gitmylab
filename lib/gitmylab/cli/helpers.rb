@@ -7,6 +7,7 @@ module Gitmylab
 
       def options_check(shell, command, options)
         @c  = options[:config_file]
+        @d  = options[:dump_config_file]
         @p  = options[:projects_include] ? options[:projects_include].any? : false
         @ap = options[:all_projects]
         @n  = options[:namespaces_include] ? options[:namespaces_include].any? : false
@@ -21,7 +22,7 @@ module Gitmylab
 
       def options_valid?
         # ((@p || @n) ^ @ap ^ @c) || (((@g || @ag) && @u && @l) ^ @c)
-        ((@p || @n) ^ (@ap || @ag) ^ @c) || (((@g || @ag) && @l) ^ @c ^ @u)
+        ((@p || @n) ^ (@ap || @ag) ^ @c ) || (((@g || @ag) && @l) ^ @c ^ @u)
       end
 
       def options_invalid?

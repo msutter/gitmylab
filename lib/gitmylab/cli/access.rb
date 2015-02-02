@@ -61,6 +61,11 @@ module Gitmylab
         :type     => :array,
         :desc     => 'The name of the users. This is the email address user part (the string before the "@")'
 
+      option :dump_config_file,
+        :aliases  => '-d',
+        :type     => :boolean,
+        :desc     => 'Generate the access config file based on current accesses'
+
       def list
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)

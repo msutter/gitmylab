@@ -8,6 +8,7 @@ module Gitmylab
       Tab         = '.' + ' '*(LeftAdjust+RightAdjust+3)
 
       def access(cli_options)
+
         roles = []
 
         if cli_options['config_file']
@@ -25,7 +26,12 @@ module Gitmylab
             end
           end
 
-          access_iterator(selected_items)
+          items = access_iterator(selected_items)
+
+          if cli_options['dump_config_file']
+            write_config(items)
+          end
+
         end
       end
 
@@ -85,6 +91,60 @@ module Gitmylab
           end
           sr.render
         end
+        items
+      end
+
+      def write_config(items)
+        roles = dump_roles(items)
+        puts roles.to_yaml
+      end
+
+      def dump_roles(items)
+        all_permissions = items.collect{|i| i.permissions.collect{|p| p}}.flatten
+
+        # group permissions by projects/groups with same access_level
+        permissions_groups_on_same_level_and_item = all_permissions.group_by do |p|
+          p.type + '_' + p.item.path + '_' + p.access_level.to_s
+        end
+
+        item_groups = {}
+        permissions_groups_on_same_level_and_item.each do |permissions_group, permissions|
+          item_groups[permissions_group] = {} unless item_groups[permissions_group]
+          permissions.each do |permission|
+            a = permission.access_level.to_s
+            path = permission.item.path
+            type = permission.type.downcase.pluralize
+            u = permission.username
+            item_groups[permissions_group][type] = {} unless item_groups[permissions_group][type]
+            item_groups[permissions_group][type][path] = a
+            item_groups[permissions_group]['users'] = [] unless item_groups[permissions_group]['users']
+            item_groups[permissions_group]['users'] << u unless item_groups[permissions_group]['users'].include?(u)
+          end
+        end
+
+        # create a role for users with same permissions on projects and groups
+        users_groups = item_groups.group_by do |item_name, item_group|
+          item_group['users'].sort.join(';')
+        end
+
+        roles = []
+        users_groups.each_with_index do |user_group, i|
+          projects = {}
+          groups   = {}
+          user_group.last.each do |group_name, item|
+            projects.merge!(item['projects']) if item['projects']
+            groups.merge!(item['groups']) if item['groups']
+          end
+          k = 'role_' + "%03d" % (i + 1)
+          role = {k => {}}
+          users = user_group.first.split(';')
+
+          role[k]['projects'] = projects if projects.any?
+          role[k]['groups']   = groups if groups.any?
+          role[k]['users']    = users
+          roles << role
+        end
+        roles
       end
 
       def get_items_count(sp, sg)
