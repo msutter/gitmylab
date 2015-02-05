@@ -5,6 +5,12 @@ module Gitmylab
 
       include Helpers
 
+      class_option  :config_file,
+        :aliases => '-c',
+        :type    => :boolean,
+        :desc    => 'Apply to projects defined in the include/exclude config files'
+
+
       desc "list", "List branches to gitlab projects"
       def list
         options_check(shell, command, options)

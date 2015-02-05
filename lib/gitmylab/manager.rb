@@ -59,9 +59,7 @@ module Gitmylab
         ni = :all
 
       when cli_options.config_file then
-        config_options = {}
-        config_options.merge!(configatron.include.to_hash) if configatron.has_key?(:include)
-        config_options.merge!(configatron.exclude.to_hash) if configatron.has_key?(:exclude)
+        config_options = configatron.projects.to_hash if configatron.has_key?(:projects)
 
         # set options defaults if nothing else defined (all projects in all namespaces)
         pi = config_options[:projects_include] ? config_options[:projects_include] : :all

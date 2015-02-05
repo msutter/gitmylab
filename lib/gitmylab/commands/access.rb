@@ -127,6 +127,7 @@ module Gitmylab
           item_group['users'].sort.join(';')
         end
 
+        # creates a role for users with same permissions
         roles = []
         users_groups.each_with_index do |user_group, i|
           projects = {}
@@ -145,6 +146,10 @@ module Gitmylab
           roles << role
         end
         roles
+      end
+
+      def parse_roles
+        
       end
 
       def get_items_count(sp, sg)

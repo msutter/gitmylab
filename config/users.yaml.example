@@ -1,7 +1,0 @@
----
-role_foo:
-  - user1
-
-role_bar:
-  - user10
-  - user11

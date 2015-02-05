@@ -5,8 +5,12 @@ module Gitmylab
 
       include Helpers
 
-      desc "sync", "syncronize gitlab repository"
+      class_option  :config_file,
+        :aliases => '-c',
+        :type    => :boolean,
+        :desc    => 'Apply to projects defined in the include/exclude config files'
 
+      desc "sync", "syncronize gitlab repository"
       def sync
         options_check(shell, command, options)
         m = Gitmylab::Manager.new(command, __method__)

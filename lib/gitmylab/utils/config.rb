@@ -15,12 +15,10 @@ module Gitmylab
         'sync.yaml',
         'ad.yaml',
         'access.yaml',
-        'exclude.yaml',
-        'include.yaml'
+        'projects.yaml'
       ]
 
       @@remote_config_files = [
-        'users.yaml',
         'roles.yaml'
       ]
 
