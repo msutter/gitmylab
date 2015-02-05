@@ -14,8 +14,8 @@ module Gitmylab
       desc "list", "List branches to gitlab projects"
       def list
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.branch(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.branch
       end
 
       desc "add", "Add a branch to gitlab projects"
@@ -40,8 +40,8 @@ module Gitmylab
 
       def add
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.branch(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.branch
       end
 
       desc "protect", "Protect a branch of gitlab projects"
@@ -54,8 +54,8 @@ module Gitmylab
 
       def protect
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.branch(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.branch
       end
 
       desc "unprotect", "Unprotect a branch of gitlab projects"
@@ -68,8 +68,8 @@ module Gitmylab
 
       def unprotect
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.branch(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.branch
       end
 
     end

@@ -11,18 +11,6 @@
 
 projects_include: :all
 
-# projects_exclude
-#
-# list of projects to be excluded from the sync
-# defaults to no projects with an empty array
-#
-# example:
-#
-# projects_exclude:
-#   - unwanted_project
-
-projects_exclude: []
-
 # namespaces_include
 #
 # list of namespaces(groups) to be included from the sync
@@ -35,6 +23,18 @@ projects_exclude: []
 #   - only_wanted_namespace
 
 namespaces_include: :all
+
+# projects_exclude
+#
+# list of projects to be excluded from the sync
+# defaults to no projects with an empty array
+#
+# example:
+#
+# projects_exclude:
+#   - unwanted_project
+
+projects_exclude: []
 
 # namespaces_exclude
 #

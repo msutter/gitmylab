@@ -3,10 +3,10 @@ module Gitmylab
 
     module Project
 
-      def project(cli_options)
+      def project
         # reset results
         @sync_results = []
-        selected_projects = select_items(cli_options)
+        selected_projects = select_items
         exit 1 if selected_projects.empty?
         cli_iterator selected_projects do |project|
           sr         = Cli::Result.new(project)

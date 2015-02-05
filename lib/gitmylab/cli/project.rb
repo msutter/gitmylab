@@ -13,8 +13,8 @@ module Gitmylab
       desc "sync", "syncronize gitlab repository"
       def sync
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.project(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.project
       end
 
     end

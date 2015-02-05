@@ -15,14 +15,15 @@ module Gitmylab
         'sync.yaml',
         'ad.yaml',
         'access.yaml',
-        'projects.yaml'
+        'projects.yaml',
       ]
 
       @@remote_config_files = [
         'roles.yaml'
       ]
 
-      def self.setup(command)
+      def self.setup(command, action, options)
+        Gitmylab::Cli::Message.level = options['verbosity'].to_sym
         begin
           create_local_config_files
           load_local_config_files
@@ -57,7 +58,6 @@ module Gitmylab
           raise "missing config file #{file} in repository #{access_project.web_url}" unless File.exists?(config_file_path)
           load_config_file(config_file_path)
         end
-
       end
 
       def self.gitlab_setup
@@ -84,7 +84,7 @@ module Gitmylab
             ActiveDirectory::Base.connected?
           end
         rescue Timeout::Error => e
-          puts "Active directory connection timeout !"
+          puts "Active directory connection timeout !" if Cli::Message.level > 0
         rescue
           raise "Active directory connection error: #{ActiveDirectory::Base.error}"
         end

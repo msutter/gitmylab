@@ -12,12 +12,13 @@ module Gitmylab
     include Gitmylab::Utils::Helpers
 
 
-    def initialize(command, action)
-      @command = command
-      @action = action
+    def initialize(command, action, options)
+      Utils::Config.setup(command, action, options)
+      @command        = command
+      @action         = action
+      @options        = options
       @access_project = nil
-      @sync_results = []
-      Utils::Config.setup(command)
+      @sync_results   = []
     end
 
     # def report
@@ -27,13 +28,12 @@ module Gitmylab
 
     private
 
-    def select_items(cli_options)
-      Gitmylab::Cli::Message.level = cli_options['verbosity'].to_sym
+    def select_items
       horizontal_rule :width => terminal_width if Gitmylab::Cli::Message.level > 0
       items = spinner('Loading selected gitlab objects...') do
-        project_selection = get_project_selections(cli_options)
+        project_selection = get_project_selections
         projects = Gitmylab::Gitlab::Project.filter_by_selection(project_selection)
-        group_selection = get_groups_selections(cli_options)
+        group_selection = get_groups_selections
         groups = Gitmylab::Gitlab::Group.filter_by_selection(group_selection)
         projects + groups
       end
@@ -41,7 +41,7 @@ module Gitmylab
       items
     end
 
-    def get_project_selections(cli_options)
+    def get_project_selections
 
       # set default to no project
       pi = []
@@ -50,15 +50,15 @@ module Gitmylab
       ne = []
 
       case
-      when cli_options.projects_include || cli_options.namespaces_include then
-        pi = cli_options.projects_include ? cli_options.projects_include : :all
-        ni = cli_options.namespaces_include ? cli_options.namespaces_include : :all
+      when @options.projects_include || @options.namespaces_include then
+        pi = @options.projects_include ? @options.projects_include : :all
+        ni = @options.namespaces_include ? @options.namespaces_include : :all
 
-      when cli_options.all_projects then
+      when @options.all_projects then
         pi = :all
         ni = :all
 
-      when cli_options.config_file then
+      when @options.config_file then
         config_options = configatron.projects.to_hash if configatron.has_key?(:projects)
 
         # set options defaults if nothing else defined (all projects in all namespaces)
@@ -70,8 +70,8 @@ module Gitmylab
       end
 
       # finally add the exluded projects and namespaces from cli
-      pe += cli_options.projects_exclude if cli_options.projects_exclude
-      ne += cli_options.namespaces_exclude if cli_options.namespaces_exclude
+      pe += @options.projects_exclude if @options.projects_exclude
+      ne += @options.namespaces_exclude if @options.namespaces_exclude
       {
         :projects_include   => pi,
         :projects_exclude   => pe,
@@ -80,13 +80,13 @@ module Gitmylab
       }
     end
 
-    def get_groups_selections(cli_options)
+    def get_groups_selections
       groups_include = []
       groups_exclude = []
       case
-      when cli_options.has_key?('groups') then
-        groups_include = cli_options.groups ? cli_options.groups : []
-      when cli_options.has_key?('all_groups') && cli_options.all_groups then
+      when @options.has_key?('groups') then
+        groups_include = @options.groups ? @options.groups : []
+      when @options.has_key?('all_groups') && @options.all_groups then
         groups_include = :all
       end
       {

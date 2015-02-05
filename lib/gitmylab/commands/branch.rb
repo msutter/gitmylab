@@ -3,8 +3,8 @@ module Gitmylab
 
     module Branch
 
-      def branch(cli_options)
-        selected_projects = select_items(cli_options)
+      def branch
+        selected_projects = select_items
         exit 1 if selected_projects.empty?
         cli_iterator selected_projects do |project|
           sr         = Cli::Result.new(project)
@@ -25,16 +25,16 @@ module Gitmylab
             end
 
           when :add
-            if branches.any? {|b| b.name == cli_options['branch_name']}
+            if branches.any? {|b| b.name == @options['branch_name']}
               sr.status  = :skip
-              sr.message = "branch #{cli_options['branch_name']} already exists !"
+              sr.message = "branch #{@options['branch_name']} already exists !"
             else
               if project.default_branch
-                ::Gitlab.create_branch(project.id, cli_options['branch_name'], cli_options['ref'])
-                ::Gitlab.protect_branch(project.id, cli_options['branch_name']) if cli_options['protected']
+                ::Gitlab.create_branch(project.id, @options['branch_name'], @options['ref'])
+                ::Gitlab.protect_branch(project.id, @options['branch_name']) if @options['protected']
                 sr.status  = :success
-                sr.message = "branch #{cli_options['branch_name']} created"
-                sr.message << " and protected" if cli_options['protected']
+                sr.message = "branch #{@options['branch_name']} created"
+                sr.message << " and protected" if @options['protected']
               else
                 sr.status  = :skip
                 sr.message = "No default branch found.\nThis often appends with empty gitlab repositories"
@@ -42,33 +42,33 @@ module Gitmylab
             end
 
           when :protect
-            if branch = branches.detect {|b| b.name == cli_options['branch_name']}
+            if branch = branches.detect {|b| b.name == @options['branch_name']}
               if branch.protected
                 sr.status  = :skip
-                sr.message = "branch #{cli_options['branch_name']} already protected !"
+                sr.message = "branch #{@options['branch_name']} already protected !"
               else
-                ::Gitlab.protect_branch(project.id, cli_options['branch_name'])
+                ::Gitlab.protect_branch(project.id, @options['branch_name'])
                 sr.status  = :success
-                sr.message = "branch #{cli_options['branch_name']} is now protected"
+                sr.message = "branch #{@options['branch_name']} is now protected"
               end
             else
               sr.status  = :skip
-              sr.message = "branch #{cli_options['branch_name']} not found !"
+              sr.message = "branch #{@options['branch_name']} not found !"
             end
 
           when :unprotect
-            if branch = branches.detect {|b| b.name == cli_options['branch_name']}
+            if branch = branches.detect {|b| b.name == @options['branch_name']}
               unless branch.protected
                 sr.status  = :skip
-                sr.message = "branch #{cli_options['branch_name']} already unprotected !"
+                sr.message = "branch #{@options['branch_name']} already unprotected !"
               else
-                ::Gitlab.unprotect_branch(project.id, cli_options['branch_name'])
+                ::Gitlab.unprotect_branch(project.id, @options['branch_name'])
                 sr.status  = :success
-                sr.message = "branch #{cli_options['branch_name']} is now unprotected"
+                sr.message = "branch #{@options['branch_name']} is now unprotected"
               end
             else
               sr.status  = :skip
-              sr.message = "branch #{cli_options['branch_name']} not found !"
+              sr.message = "branch #{@options['branch_name']} not found !"
             end
 
           end

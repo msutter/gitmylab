@@ -86,11 +86,6 @@ class GitmylabCli < Thor
                 :type    => :array,
                 :desc    => 'Exclude projects in given namespaces'
 
-  # class_option  :config_file,
-  #               :aliases => '-c',
-  #               :type    => :boolean,
-  #               :desc    => 'Apply to projects defined in the include/exclude config files'
-
   class_option  :verbosity,
                 :type    => :string,
                 :enum    => ['detailed', 'info', 'silent'],

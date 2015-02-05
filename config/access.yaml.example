@@ -1,9 +1,9 @@
 ---
 # access_config_files_project
 #
-# Config files default location is ${HOME}/.gitlabsync, but
+# Config files default location is the ${HOME}/.gitmylab directory, but
 # you can also grab the access config files from a gitlab project.
-# If defined, the local access config files (roles.yaml/users.yaml) will
+# If defined, the local access config files (roles.yaml) will
 # not be created or will be ignored if present. The files in the
 # given gitlab repository will be applied.
 

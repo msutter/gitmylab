@@ -38,8 +38,8 @@ module Gitmylab
 
       def add
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.access(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.access
       end
 
       desc "remove", "Remove gitlab access"
@@ -51,8 +51,8 @@ module Gitmylab
 
       def remove
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.access(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.access
       end
 
       desc "list", "List gitlab access"
@@ -68,8 +68,15 @@ module Gitmylab
 
       def list
         options_check(shell, command, options)
-        m = Gitmylab::Manager.new(command, __method__)
-        m.access(options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.access
+      end
+
+      desc "sync", "Sync gitlab access based on the roles config file"
+      def sync
+        options_help unless options.any?
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.access
       end
 
     end

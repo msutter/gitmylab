@@ -7,20 +7,22 @@ module Gitmylab
       RightAdjust = 10
       Tab         = '.' + ' '*(LeftAdjust+RightAdjust+3)
 
-      def access(cli_options)
+      def access
 
         roles = []
 
-        if cli_options['config_file']
-          #roles = parsed_config
+        if @action == :sync
+          add_items = select_items_for_permissions_from_config
+          @action = :add
+          access_iterator(add_items)
         else
-          selected_items = select_items(cli_options)
+          selected_items = select_items
 
           selected_items.each do |item|
-            if cli_options['users']
+            if @options['users']
               permissions = []
-              cli_options['users'].each do |username|
-                permissions << Gitmylab::Access::Permission.new(username, item, cli_options['level'], cli_options['regression'])
+              @options['users'].each do |username|
+                permissions << Gitmylab::Access::Permission.new(username, item, @options['level'], @options['regression'])
               end
               item.permissions = permissions
             end
@@ -28,7 +30,7 @@ module Gitmylab
 
           items = access_iterator(selected_items)
 
-          if cli_options['dump_config_file']
+          if @options['dump_config_file']
             write_config(items)
           end
 
@@ -128,7 +130,6 @@ module Gitmylab
         end
 
         # creates a role for users with same permissions
-        roles = []
         users_groups.each_with_index do |user_group, i|
           projects = {}
           groups   = {}
@@ -143,13 +144,57 @@ module Gitmylab
           role[k]['projects'] = projects if projects.any?
           role[k]['groups']   = groups if groups.any?
           role[k]['users']    = users
-          roles << role
         end
-        roles
+        role
+      end
+
+      def select_items_for_permissions_from_config
+
+        # get all items
+        @options['all_groups']   = true
+        @options['all_projects'] = true
+        items = select_items
+
+        # get config file
+        config_roles = configatron.has_key?(:roles) ? configatron.roles.to_hash : []
+
+        items.each do |item|
+          item.permissions = []
+          affected_roles = config_roles.select do |role_name, role_attributes|
+            (
+              item.type == 'Project' &&
+              role_attributes.has_key?(:projects) &&
+              role_attributes[:projects].keys.include?(item.path.downcase.to_sym)
+            ) ||
+            (
+              item.type == 'Group' &&
+              role_attributes.has_key?(:groups) &&
+              role_attributes[:groups].keys.include?(item.path.downcase.to_sym)
+            )
+          end
+
+          affected_roles.each do |role_name, role_attributes|
+            config_permissions = []
+            role_attributes[:users].each do |user|
+              if role_attributes.has_key?(:projects) && role_attributes[:projects].any?
+                role_attributes[:projects].each do |project, level|
+                  config_permissions << Gitmylab::Access::Permission.new(user, item, level)
+                end
+              end
+              if role_attributes.has_key?(:groups) && role_attributes[:groups].any?
+                role_attributes[:groups].each do |group, level|
+                  config_permissions << Gitmylab::Access::Permission.new(user, item, level)
+                end
+              end
+            end
+            item.permissions += config_permissions
+          end
+        end
+        items.select{|item| item.permissions.any?}
       end
 
       def parse_roles
-        
+
       end
 
       def get_items_count(sp, sg)
