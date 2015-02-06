@@ -73,6 +73,19 @@ module Gitmylab
       end
 
       desc "sync", "Sync gitlab access based on the roles config file"
+
+      option :force_deletion,
+        :aliases => '-F',
+        :type    => :boolean,
+        :desc    => "By default, the existing accesses will not be deleted. Use this option to delete the accesses absent from roles config file",
+        :default => false
+
+      option :regression,
+        :aliases => '-R',
+        :type    => :boolean,
+        :desc    => "By default, the existing accesses will not be regressed. Use this option to regress the access",
+        :default => false
+
       def sync
         options_help unless options.any?
         m = Gitmylab::Manager.new(command, __method__, options)

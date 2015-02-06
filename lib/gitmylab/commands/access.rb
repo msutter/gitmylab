@@ -12,9 +12,7 @@ module Gitmylab
         roles = []
 
         if @action == :sync
-          add_items = select_items_for_permissions_from_config
-          @action = :add
-          access_iterator(add_items)
+          access_sync
         else
           selected_items = select_items
 
@@ -130,6 +128,7 @@ module Gitmylab
         end
 
         # creates a role for users with same permissions
+        roles = {}
         users_groups.each_with_index do |user_group, i|
           projects = {}
           groups   = {}
@@ -138,28 +137,34 @@ module Gitmylab
             groups.merge!(item['groups']) if item['groups']
           end
           k = 'role_' + "%03d" % (i + 1)
-          role = {k => {}}
+          roles[k] = {}
           users = user_group.first.split(';')
 
-          role[k]['projects'] = projects if projects.any?
-          role[k]['groups']   = groups if groups.any?
-          role[k]['users']    = users
+          roles[k]['projects'] = projects if projects.any?
+          roles[k]['groups']   = groups if groups.any?
+          roles[k]['users']    = users
         end
-        role
+        roles
       end
 
-      def select_items_for_permissions_from_config
+      def access_sync
+        # # get all items
+        # @options['all_groups']   = true
+        # @options['all_projects'] = true
 
-        # get all items
-        @options['all_groups']   = true
-        @options['all_projects'] = true
         items = select_items
 
         # get config file
         config_roles = configatron.has_key?(:roles) ? configatron.roles.to_hash : []
 
         items.each do |item|
-          item.permissions = []
+
+          role_permissions = []
+          item.permissions = nil
+          spinner "Loading #{item.type.downcase} #{item.path} members..." do
+            item.get_permissions
+          end
+
           affected_roles = config_roles.select do |role_name, role_attributes|
             (
               item.type == 'Project' &&
@@ -176,25 +181,41 @@ module Gitmylab
           affected_roles.each do |role_name, role_attributes|
             config_permissions = []
             role_attributes[:users].each do |user|
-              if role_attributes.has_key?(:projects) && role_attributes[:projects].any?
+
+              if role_attributes.has_key?(:projects) && role_attributes[:projects].keys.include?(item.path.to_sym)
                 role_attributes[:projects].each do |project, level|
-                  config_permissions << Gitmylab::Access::Permission.new(user, item, level)
+                  config_permissions << Gitmylab::Access::Permission.new(user, item, level, @options[:regression])
                 end
               end
-              if role_attributes.has_key?(:groups) && role_attributes[:groups].any?
+
+              if role_attributes.has_key?(:groups) && role_attributes[:groups].keys.include?(item.path.to_sym)
                 role_attributes[:groups].each do |group, level|
-                  config_permissions << Gitmylab::Access::Permission.new(user, item, level)
+                  config_permissions << Gitmylab::Access::Permission.new(user, item, level, @options[:regression])
                 end
               end
+
             end
-            item.permissions += config_permissions
+            role_permissions += config_permissions
           end
+
+          # compare permissions
+          permissions_to_delete = item.permissions.reject do |ap|
+            role_permissions.detect{|rp| ap.user == rp.user }
+          end
+
+          # Add permissions
+          item.permissions = role_permissions
+          @action = :add
+          access_iterator([item]) if item.permissions.any?
+
+          if @options[:force_deletion]
+          # Remove permissions not defined in Roles
+            item.permissions = permissions_to_delete
+            @action = :remove
+            access_iterator([item]) if item.permissions.any?
+          end
+
         end
-        items.select{|item| item.permissions.any?}
-      end
-
-      def parse_roles
-
       end
 
       def get_items_count(sp, sg)
