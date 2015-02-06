@@ -18,7 +18,7 @@ module Gitmylab
       def list
         p = @item_access_class.new(user, @item)
         # Gitmylab::Manager.spinner "Loading #{@item_class_name} members..." do
-          @access_level = p.get
+        @access_level = p.get
         # end
         @access_level ? @access_level.to_s : nil
       end
@@ -41,8 +41,12 @@ module Gitmylab
         @item_class_name
       end
 
+      def title
+        to_s
+      end
+
       def to_s
-        "#{@item.path}: #{@username} ==> #{@access_level}"
+        "#{@item.path} #{@username}"
       end
 
     end

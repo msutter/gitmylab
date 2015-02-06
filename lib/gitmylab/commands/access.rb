@@ -11,7 +11,8 @@ module Gitmylab
 
         roles = []
 
-        if @action == :sync
+        case @action
+        when :sync
           access_sync
         else
           selected_items = select_items
@@ -37,7 +38,8 @@ module Gitmylab
 
       def access_iterator(items)
 
-        cli_iterator items do |item|
+        items.each do |item|
+
           sr         = Cli::Result.new(item)
           sr.command = @command
           sr.action  = @action
@@ -50,7 +52,9 @@ module Gitmylab
           end
 
           if item.permissions.any?
-            item.permissions.each do |permission|
+            # item.permissions.each do |permission|
+            cli_iterator item.permissions do |permission|
+
               if permission.user
                 case @action
                 when :list
@@ -148,10 +152,6 @@ module Gitmylab
       end
 
       def access_sync
-        # # get all items
-        # @options['all_groups']   = true
-        # @options['all_projects'] = true
-
         items = select_items
 
         # get config file
@@ -209,7 +209,7 @@ module Gitmylab
           access_iterator([item]) if item.permissions.any?
 
           if @options[:force_deletion]
-          # Remove permissions not defined in Roles
+            # Remove permissions not defined in Roles
             item.permissions = permissions_to_delete
             @action = :remove
             access_iterator([item]) if item.permissions.any?

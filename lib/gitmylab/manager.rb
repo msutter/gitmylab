@@ -132,7 +132,7 @@ module Gitmylab
       enumerable.each do |item|
         horizontal_rule :width => terminal_width if Cli::Message.level > 0
         syncing_bar.resume
-        syncing_bar.increment(item.path)
+        syncing_bar.increment(item.title)
         syncing_bar.pause
         horizontal_rule :width => terminal_width if Cli::Message.level > 0
         # begin

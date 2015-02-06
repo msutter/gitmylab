@@ -81,6 +81,10 @@ module Gitmylab
           class_lastname(self)
         end
 
+        def title
+          path
+        end
+
         def list(*args)
           self.class.list(*args)
         end
