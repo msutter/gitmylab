@@ -20,7 +20,6 @@ module Gitmylab
       end
 
       def full_title
-        binding.pry
         @title + @sub_title + ' '*(title_full_length - title_effective_length)
       end
 

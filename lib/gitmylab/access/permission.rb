@@ -33,6 +33,15 @@ module Gitmylab
         p.delete
       end
 
+      def group
+        case item.type
+        when 'Project'
+          item.group
+        else
+          item
+        end
+      end
+
       def user
         @user ||= Gitmylab::Gitlab::User.find_by_username(@username).first
       end
@@ -42,11 +51,11 @@ module Gitmylab
       end
 
       def title
-        to_s
+        "on #{@item.type} #{@item.title} for user #{@username}"
       end
 
       def to_s
-        "#{@item.path} #{@username}"
+        "#{@item.title} #{@username}"
       end
 
     end

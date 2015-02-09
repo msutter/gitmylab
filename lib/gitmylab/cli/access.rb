@@ -74,10 +74,18 @@ module Gitmylab
 
       desc "sync", "Sync gitlab access based on the roles config file"
 
-      option :force_deletion,
-        :aliases => '-F',
+      option :deletion,
+        :aliases => '-d',
         :type    => :boolean,
-        :desc    => "By default, the existing accesses will not be deleted. Use this option to delete the accesses absent from roles config file",
+        :desc    => "By default, the existing accesses will not be deleted. \
+Use this option to delete the accesses absent from roles config file",
+        :default => false
+
+      option :force_deletion,
+        :aliases => '-f',
+        :type    => :boolean,
+        :desc    => "By default, the deletion of existing accesses will aks if you're sure to execute a destructive action. \
+Use this option to force the deletion without confirmation",
         :default => false
 
       option :regression,
@@ -87,10 +95,29 @@ module Gitmylab
         :default => false
 
       def sync
+        if options['deletion']
+          confirm = options['force_deletion'] ? 'YES' : ask(
+            "This will DELETE all projects and groups permissions not defined in your role config file.\n\
+You can use the --force-deletion option to bypass the confirmation message.\n\
+Are you sure ?",
+            :limited_to => ['YES', 'NO']
+          )
+          exit 1 if (confirm != 'YES')
+        end
+
         options_help unless options.any?
         m = Gitmylab::Manager.new(command, __method__, options)
         m.access
       end
+
+      desc "clean", "Clean duplicated gitlab accesses."
+
+      def clean
+        options_check(shell, command, options)
+        m = Gitmylab::Manager.new(command, __method__, options, shell)
+        m.access
+      end
+
 
     end
 

@@ -29,7 +29,7 @@ map_to_active_directory: true
 
 force_regressions: false
 
-# force_deletions
+# deletions
 #
 # Per default, an existing permission already set in Gitlab will not be deleted.
 # With this setting, you can force the setting of the deletion of users not set in the role.yaml config file.

@@ -12,11 +12,12 @@ module Gitmylab
     include Gitmylab::Utils::Helpers
 
 
-    def initialize(command, action, options)
+    def initialize(command, action, options, shell=nil)
       Utils::Config.setup(command, action, options)
       @command        = command
       @action         = action
       @options        = options
+      @shell          = shell
       @access_project = nil
       @sync_results   = []
     end
@@ -97,8 +98,7 @@ module Gitmylab
 
     def count_message(item_name, enumerable)
       if enumerable.count > 0
-        path_array = enumerable.collect{|p| p.path }
-        @path_max_length = path_array.max_by{|a|a.length}.length
+
         many = enumerable.count > 1 ? true : false
         m = Cli::Message.new("#{enumerable.count} #{item_name}#{'s' if many} found")
         m.indent        = 0
@@ -120,23 +120,31 @@ module Gitmylab
 
     end
 
+    def cli_iterator(enumerable, hide=false, &block)
 
-    def cli_iterator(enumerable, &block)
-      item_name = class_lastname(enumerable.first).downcase
-      syncing_bar = Cli::SyncingBar.new(
-        :title                => "#{@command.to_s} #{@action.to_s} for #{item_name} ",
-        :total                => enumerable.count,
-        :sub_title_max_length => @path_max_length,
-      )
+      unless hide
+        item_name = class_lastname(enumerable.first).downcase
+
+        title_array = enumerable.collect{|p| p.title }
+        title_max_length = title_array.max_by{|a|a.length}.length
+
+        syncing_bar = Cli::SyncingBar.new(
+          :title                => "#{@command.to_s} #{@action.to_s} ",
+          :total                => enumerable.count,
+          :sub_title_max_length => title_max_length,
+        )
+      end
 
       enumerable.each do |item|
-        horizontal_rule :width => terminal_width if Cli::Message.level > 0
-        syncing_bar.resume
-        syncing_bar.increment(item.title)
-        syncing_bar.pause
-        horizontal_rule :width => terminal_width if Cli::Message.level > 0
+        unless hide
+          horizontal_rule :width => terminal_width if Cli::Message.level > 0
+          syncing_bar.resume
+          syncing_bar.increment(item.title)
+          syncing_bar.pause
+          horizontal_rule :width => terminal_width if Cli::Message.level > 0
+        end
         # begin
-          yield item
+        yield item
         # rescue => e
         #   sr         = Cli::Result.new(item)
         #   sr.command = @command
@@ -146,7 +154,7 @@ module Gitmylab
         #   sr.render
         # end
       end
-      syncing_bar.finish
+      syncing_bar.finish unless hide
 
     end
 

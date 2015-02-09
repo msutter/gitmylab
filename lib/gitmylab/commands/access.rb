@@ -14,6 +14,8 @@ module Gitmylab
         case @action
         when :sync
           access_sync
+        when :clean
+          access_clean
         else
           selected_items = select_items
 
@@ -27,7 +29,7 @@ module Gitmylab
             end
           end
 
-          items = access_iterator(selected_items)
+          items = access_item_iterator(selected_items) if selected_items.any?
 
           if @options['dump_config_file']
             write_config(items)
@@ -36,14 +38,15 @@ module Gitmylab
         end
       end
 
-      def access_iterator(items)
+      def access_item_iterator(items)
 
-        items.each do |item|
+        hide_item = true unless @action == :list
+        cli_iterator items, hide_item  do |item|
 
-          sr         = Cli::Result.new(item)
-          sr.command = @command
-          sr.action  = @action
-          sr.message = ''
+          ir         = Cli::Result.new(item)
+          ir.command = @command
+          ir.action  = @action
+          ir.message = ''
 
           if item.permissions.nil?
             spinner "Loading #{item.type.downcase} members..." do
@@ -52,50 +55,112 @@ module Gitmylab
           end
 
           if item.permissions.any?
-            # item.permissions.each do |permission|
-            cli_iterator item.permissions do |permission|
+            if hide_item
+              access_permission_iterator(item.permissions)
+            else
+              access_permission_iterator(item.permissions, ir)
+            end
+          else
+            ir.message << "no members found for #{item.path}\n"
+            ir.status  = :empty
+          end
+          ir.render unless hide_item
+        end
+        items
+      end
 
-              if permission.user
-                case @action
-                when :list
-                  if permission.list
-                    sr.message << "#{(permission.user.username + ' / ' + permission.user.name).ljust(LeftAdjust)} => #{' '*RightAdjust + permission.access_level.to_s}\n"
-                    sr.status  = :success
-                  else
-                    sr.message << "#{(permission.user.username + '/' + permission.user.name).ljust(LeftAdjust)} => #{' '*RightAdjust}no direct access\n"
-                    sr.status  = :skip
-                  end
-                when :add
-                  r = permission.create
-                  sr.status = r.status
-                  sr.message << case r.reason
-                  when :exists then "user '#{permission.user.username}' already has access level '#{permission.access_level}'\n"
-                  when :regression then "user '#{permission.user.username}' already has access level '#{permission.access_level}', Use -R to force regression\n"
-                  else "access level '#{permission.access_level}' set for user '#{permission.user.username}'\n"
-                  end
-                when :remove
-                  access_level = permission.list
-                  if permission.list
-                    r = permission.remove
-                    sr.status = :success
-                    sr.message << "access level '#{permission.access_level}' removed for user '#{permission.user.username}'\n"
-                  else
-                    sr.message << "user '#{permission.user.username}' already has no access\n"
-                    sr.status = :skip
-                  end
-                end
+      def access_permission_iterator(permissions, result = nil)
+        hide = result ? true : nil
+        cli_iterator permissions, hide do |permission|
+          if result
+            pr = result
+          else
+            pr         = Cli::Result.new(permission.item)
+            pr.command = @command
+            pr.action  = @action
+            pr.message = ''
+          end
+
+          if permission.user
+            case @action
+            when :list
+              if permission.list
+                pr.message << "#{(permission.user.username + ' / ' + permission.user.name).ljust(LeftAdjust)} => #{' '*RightAdjust + permission.access_level.to_s}\n"
               else
-                sr.status  = :skip
-                sr.message << "user #{permission.username} not found !\n"
+                pr.message << "#{(permission.user.username + '/' + permission.user.name).ljust(LeftAdjust)} => #{' '*RightAdjust}no direct access\n"
+              end
+            when :add
+              r = permission.create
+              pr.status = r.status
+              pr.message << case r.reason
+              when :exists then "user '#{permission.user.username}' already has access level '#{permission.access_level}'\n"
+              when :regression then "user '#{permission.user.username}' already has access level '#{r.access}', Use -R to force regression to '#{permission.access_level}'\n"
+              else "access level '#{permission.access_level}' set for user '#{permission.user.username}'\n"
+              end
+            when :remove
+              access_level = permission.list
+              if permission.list
+                r = permission.remove
+                pr.status = :success
+                pr.message << "access level '#{permission.access_level}' removed for user '#{permission.user.username}'\n"
+              else
+                pr.message << "user '#{permission.user.username}' already has no access\n"
+                pr.status = :skip
               end
             end
           else
-            sr.message << "no members found for #{item.path}\n"
-            sr.status  = :empty
+            pr.status  = :skip
+            pr.message << "user #{permission.username} not found !\n"
           end
-          sr.render
+          pr.render unless result
         end
-        items
+      end
+
+      def access_clean
+        all_dups = []
+        items = select_items
+        projects = items.select{|i| i.type == 'Project'}
+
+        group_projects = projects.group_by{|p| p.group.id}
+        group_projects.each do |group_id, projects|
+          group = Gitmylab::Gitlab::Group.find_by_id(group_id).first
+          unless group.nil?
+            spinner "Loading #{group.type.downcase} #{group.path} member permissions..." do
+              group.get_permissions
+            end unless group.permissions
+
+            projects.each do |project|
+
+              spinner "Loading #{project.type.downcase} #{project.path} member permissions..." do
+                project.get_permissions
+              end unless project.permissions
+
+              duplicated_permissions = project.permissions.select do |pp|
+
+                group.permissions.detect do |gp|
+                  gp.username == pp.username &&
+                    gp.access_level >= pp.access_level
+                end
+              end
+              all_dups += duplicated_permissions
+            end
+          end
+        end
+        puts "\nFound #{all_dups.count.to_s} duplicated permissions\n"
+        if all_dups.any?
+          all_dups.each do |p|
+            puts "#{p.item.path}: #{p.username}"
+          end
+          puts "\n"
+          confirm = @shell.ask(
+            'Delete these duplicated permissions ?',
+            :limited_to => ['YES', 'NO']
+          )
+          exit 1 if (confirm != 'YES')
+          @action = :remove
+          access_permission_iterator(all_dups) if all_dups.any?
+        end
+
       end
 
       def write_config(items)
@@ -152,18 +217,18 @@ module Gitmylab
       end
 
       def access_sync
+
         items = select_items
+        all_role_permissions = []
+        all_permissions_to_delete = []
 
         # get config file
         config_roles = configatron.has_key?(:roles) ? configatron.roles.to_hash : []
 
         items.each do |item|
-
           role_permissions = []
+
           item.permissions = nil
-          spinner "Loading #{item.type.downcase} #{item.path} members..." do
-            item.get_permissions
-          end
 
           affected_roles = config_roles.select do |role_name, role_attributes|
             (
@@ -197,25 +262,29 @@ module Gitmylab
             end
             role_permissions += config_permissions
           end
+          all_role_permissions += role_permissions
 
-          # compare permissions
-          permissions_to_delete = item.permissions.reject do |ap|
-            role_permissions.detect{|rp| ap.user == rp.user }
-          end
-
-          # Add permissions
-          item.permissions = role_permissions
-          @action = :add
-          access_iterator([item]) if item.permissions.any?
-
-          if @options[:force_deletion]
-            # Remove permissions not defined in Roles
-            item.permissions = permissions_to_delete
-            @action = :remove
-            access_iterator([item]) if item.permissions.any?
+          # compare with existing permissions
+          if @options[:deletion]
+            spinner "Comparing #{item.type.downcase} #{item.path} members access with defined roles..." do
+              item.get_permissions
+              permissions_to_delete = item.permissions.reject do |ap|
+                role_permissions.detect{|rp| ap.user == rp.user }
+              end
+              all_permissions_to_delete += permissions_to_delete
+            end
           end
 
         end
+        @action = :add
+        access_permission_iterator(all_role_permissions) if all_role_permissions.any?
+
+        # Remove permissions not defined in Roles
+        if @options[:deletion]
+          @action = :remove
+          access_permission_iterator(all_permissions_to_delete) if all_permissions_to_delete.any?
+        end
+
       end
 
       def get_items_count(sp, sg)

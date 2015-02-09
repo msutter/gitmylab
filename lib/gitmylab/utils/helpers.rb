@@ -96,7 +96,7 @@ module Gitmylab
         s.run
         enumerable = yield
         s.stop(" Done")
-        puts "\n\n" if Cli::Message.level > 0
+        puts "\n" if Cli::Message.level > 0
         enumerable
       end
 
