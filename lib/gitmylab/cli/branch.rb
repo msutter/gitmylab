@@ -72,6 +72,47 @@ module Gitmylab
         m.branch
       end
 
+      desc "diff", "Show changes between branches"
+
+      option :branch_from,
+        :aliases  => '-f',
+        :type     => :string,
+        :desc     => 'The name of the from branch',
+        :required => true
+
+      option :branch_to,
+        :aliases  => '-t',
+        :type     => :string,
+        :desc     => 'The name of the to branch',
+        :required => true
+
+      option :create_merge_request,
+        :type    => :boolean,
+        :desc    => 'If specisfied, a merge request is created',
+        :default => false
+
+      option :merge_request_message,
+        :aliases => '-m',
+        :type    => :string,
+        :desc    => 'Merge Request Message',
+        :default => ''
+
+      option :accept_pending_merge_requests,
+        :type    => :boolean,
+        :desc    => 'If specisfied, a merge request is created',
+        :default => false
+
+      option :merge_commit_message,
+        :type    => :string,
+        :desc    => 'Merge Commit Message',
+        :default => ''
+
+      def diff
+        options_check(shell, command, options)
+        m = Gitmylab::Manager.new(command, __method__, options)
+        m.branch
+      end
+
     end
 
   end

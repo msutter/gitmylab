@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "thor"
   spec.add_dependency "activesupport"
-  spec.add_dependency "gitlab"
+  spec.add_dependency "gitlab", "3.3.0"
   spec.add_dependency "git"
   spec.add_dependency "open4"
   spec.add_dependency "active_directory"
