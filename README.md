@@ -2,6 +2,12 @@
 
 Ruby command line application for managing gitlab objects.
 
-Developement in progress !!!
+Developement still in progress !!!
 
-Do not yet use it
+TODO:
+
+- Parameters validation
+- tests, tests and tests
+- documentation
+
+
