@@ -1,3 +1,4 @@
 .rbenv-gemsets
 .ruby-version
 *.lock
+.bundle
