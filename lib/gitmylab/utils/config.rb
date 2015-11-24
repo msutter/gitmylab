@@ -72,11 +72,6 @@ module Gitmylab
             http_proxy_port = ENV['http_proxy'].split(':')[1]
             config.http_proxy(http_proxy_host, http_proxy_port)
           end
-          if ENV['https_proxy']
-            https_proxy_host = ENV['https_proxy'].split(':')[0]
-            https_proxy_port = ENV['https_proxy'].split(':')[1]
-            config.https_proxy(https_proxy_host, https_proxy_port)
-          end
         end
         # test connection
         begin
