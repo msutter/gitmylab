@@ -65,6 +65,18 @@ module Gitmylab
         ::Gitlab.configure do |config|
           config.endpoint       = configatron.gitlab.endpoint
           config.private_token  = configatron.gitlab.private_token
+
+          # Set proxies if defined in environement variables
+          if ENV['http_proxy']
+            http_proxy_host = ENV['http_proxy'].split(':')[0]
+            http_proxy_port = ENV['http_proxy'].split(':')[1]
+            Gitlab.http_proxy(http_proxy_host, http_proxy_port)
+          end
+          if ENV['https_proxy']
+            https_proxy_host = ENV['https_proxy'].split(':')[0]
+            https_proxy_port = ENV['https_proxy'].split(':')[1]
+            Gitlab.https_proxy(https_proxy_host, https_proxy_port)
+          end
         end
         # test connection
         begin
